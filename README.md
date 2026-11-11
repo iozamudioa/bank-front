@@ -208,3 +208,7 @@ Registrar gasto permite elegir **Desde un sobre** o **Saldo libre de una cuenta*
 En Movimientos, **Editar** abre un modal con los datos actuales y un motivo obligatorio. Soporta ingresos, apartados, liberaciones, reasignaciones, transferencias de cuentas/sobres y gastos; los gastos permiten cambiar entre sobre y cuenta y conservar o ajustar sus aportaciones. La revisión consulta los efectos netos al servidor y la confirmación es una sola corrección atómica. No se editan saldos iniciales, reversiones ni movimientos ya revertidos. Las correcciones sobre movimientos históricos se registran en una quincena abierta sin reescribir el original.
 
 Crear sobre incluye Planeado habitual por quincena desde el inicio y lo guarda en el mismo POST con clave idempotente. Las tarjetas muestran habitualAmount y permiten editarlo con Plan habitual, sin quincena; Solo esta quincena sigue siendo un ajuste independiente. Dashboard redirige a /setup si no hay una OPEN, incluso cuando existen periodos cerrados. El asistente no permite finalizar sin una abierta.
+
+## Docker
+
+Dockerfile y compose.yaml incluidos. Consulta [el despliegue de la PWA](docs/DEPLOYMENT.md) para configurar BANK_API_URL y adaptar el Compose que vive fuera del repositorio.

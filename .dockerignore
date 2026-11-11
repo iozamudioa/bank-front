@@ -1,0 +1,11 @@
+node_modules
+.angular
+dist
+.git
+.tmp
+tmp
+coverage
+__screenshots__
+*.log
+.env
+.env.*
