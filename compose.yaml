@@ -5,7 +5,7 @@ services:
     container_name: bank-front
     environment:
       TZ: America/Mexico_City
-      BANK_API_URL: ${BANK_API_URL:-https://bank-api.ioza.dev}
+      BANK_API_URL: ${BANK_API_URL:-http://bank-api:8080}
     restart: unless-stopped
     networks:
       - infra-net

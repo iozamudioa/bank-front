@@ -74,3 +74,35 @@ No es necesario ejecutar down antes de reconstruir.
 - Las solicitudes de API no se cachean por Nginx ni por el service worker. Index, manifiesto del worker y scripts se revalidan; se mantiene intacto el contenido que Angular registra en ngsw.json.
 
 El contenedor necesita resolver y conectar por HTTPS al backend. La verificación TLS y SNI están habilitados. Las variables del frontend no deben contener secretos.
+
+## Nginx Proxy Manager y red interna
+
+Cuando NPM termina HTTPS y ambos servicios pertenecen a infra-net, se puede conectar el Nginx del frontend directamente al servicio interno de la API:
+
+```yaml
+environment:
+  TZ: America/Mexico_City
+  BANK_API_URL: http://bank-api:8080
+```
+
+bank-api y 8080 son ejemplos: usa el nombre DNS del servicio o alias Docker y su puerto interno real, no el puerto publicado del host. La API también debe estar conectada a infra-net. Esta opción ya funciona con la plantilla existente; las directivas proxy_ssl no se aplican a un upstream HTTP.
+
+Ruta resultante: navegador HTTPS → NPM → bank-front:80 → API HTTP interna. El navegador conserva HTTPS y las peticiones del frontend permanecen en /api/v1. El dominio público bank-api.ioza.dev puede seguir publicado por NPM para otros consumidores.
+
+Aplica la variable desde el directorio del Compose activo:
+
+```sh
+docker compose up -d --force-recreate bank-front
+docker compose exec bank-front nginx -t
+docker compose logs --tail=100 bank-front
+```
+
+Si se conserva BANK_API_URL=https://bank-api.ioza.dev, el contenedor debe confiar en el certificado entregado por NPM. El error unable to get local issuer certificate indica que no pudo construir la cadena hasta una CA confiable: revisa la cadena completa del certificado en NPM, si se está entregando uno de staging o si usa una CA privada. Una CA privada requiere instalar o montar el bundle de confianza correspondiente en el frontend. Que el dominio resuelva a una IP privada no explica por sí mismo ese error.
+
+Diagnóstico desde una máquina con OpenSSL y acceso al mismo NPM:
+
+```sh
+openssl s_client -connect bank-api.ioza.dev:443 -servername bank-api.ioza.dev -showcerts -verify_return_error </dev/null
+```
+
+No desactives la validación TLS para corregir una cadena incompleta. La documentación oficial de Nginx explica la [verificación del certificado del upstream](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ssl_trusted_certificate).
