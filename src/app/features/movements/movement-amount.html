@@ -1,0 +1,11 @@
+@if (direction() === 'transfer') {
+  <span class="transfer" title="Movimiento interno: salida y entrada">
+    <span>−{{ movement().amount | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</span>
+    <span>+{{ movement().amount | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</span>
+  </span>
+} @else {
+  <span
+    >{{ direction() === 'credit' ? '+' : direction() === 'debit' ? '−' : ''
+    }}{{ movement().amount | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</span
+  >
+}

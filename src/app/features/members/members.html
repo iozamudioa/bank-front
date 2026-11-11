@@ -1,0 +1,14 @@
+<section class="panel">
+  <h2>Integrantes del hogar</h2>
+  @for (m of rows(); track m.id) {
+    <div class="row">
+      <strong>{{ m.displayName }}</strong><span class="pill">{{ m.role | statusLabel }}</span>
+    </div>
+  }
+  <button class="primary" [disabled]="!s.householdId()" (click)="modals.member()">
+    <app-icon name="add" size="sm" />Agregar integrante
+  </button>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+</section>

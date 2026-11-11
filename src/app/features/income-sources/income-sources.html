@@ -1,0 +1,17 @@
+<section class="panel">
+  <h2>Fuentes de ingreso</h2>
+  @for (source of rows(); track source.id) {
+    <div class="row">
+      <span>{{ source.name }}</span><span
+        >Esperado: {{ source.expectedAmount | currency: 'MXN' : 'symbol-narrow' }}</span
+      >
+    </div>
+  }
+  <button class="primary" [disabled]="!s.householdId()" (click)="modals.incomeSource()">
+    <app-icon name="add" size="sm" />Crear fuente de ingreso
+  </button>
+  <small>Los importes esperados no son ingresos recibidos.</small>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+</section>

@@ -1,0 +1,29 @@
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.warning {
+  margin-top: 20px;
+}
+
+.envelope-balance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--bank-text-muted);
+}
+.envelope-balance strong {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bank-primary);
+}

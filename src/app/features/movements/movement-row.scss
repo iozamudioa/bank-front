@@ -1,0 +1,122 @@
+:host {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr) 88px auto;
+  align-items: center;
+  column-gap: 6px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--bank-border);
+  grid-column: 1/-1;
+}
+@supports (grid-template-columns: subgrid) {
+  :host {
+    grid-template-columns: subgrid;
+  }
+}
+:host:last-child {
+  border-bottom: 0;
+}
+.movement-description {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+strong {
+  font-size: 13px;
+}
+small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.6;
+  margin-top: 6px;
+  color: var(--bank-text-muted);
+}
+.movement-actions {
+  display: grid;
+  grid-template-columns: 44px 44px;
+  align-items: center;
+}
+.movement-actions > span {
+  width: 44px;
+}
+button {
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  color: var(--bank-primary);
+}
+.amount {
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 650px) {
+  strong,
+  .amount {
+    font-size: 12px;
+  }
+  small {
+    font-size: 10px;
+  }
+}
+
+.reversed {
+  margin-left: 8px;
+  font-size: 10px;
+  color: var(--bank-text-muted);
+}
+
+.type-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--bank-surface);
+  color: var(--bank-primary);
+}
+.movement-note {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: var(--bank-text-muted);
+  padding-inline: 8px;
+}
+.note-label {
+  display: none;
+}
+@media (max-width: 650px) {
+  :host {
+    grid-template-columns: 28px minmax(0, 1fr) 88px auto;
+    row-gap: 4px;
+  }
+  @supports (grid-template-columns: subgrid) {
+    :host {
+      grid-template-columns: subgrid;
+    }
+  }
+  .type-icon {
+    grid-column: 1;
+    grid-row: 1;
+    width: 28px;
+  }
+  .movement-description {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .movement-actions {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+  .amount {
+    grid-column: 4;
+    grid-row: 1 / 3;
+  }
+  .movement-note {
+    grid-column: 2;
+    grid-row: 2;
+    padding: 0;
+    font-size: 10px;
+  }
+  .note-label {
+    display: inline;
+  }
+}

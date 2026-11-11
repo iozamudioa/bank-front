@@ -1,0 +1,229 @@
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 244px;
+  padding: 36px 24px;
+  background: var(--bank-surface);
+  border-right: 1px solid var(--bank-border);
+  display: flex;
+  flex-direction: column;
+}
+.brand {
+  font-weight: 900;
+  font-size: 32px;
+  letter-spacing: -2px;
+  color: var(--bank-text);
+  text-decoration: none;
+}
+.brand span {
+  color: var(--bank-primary);
+  font-size: 24px;
+}
+.tagline {
+  font-size: 11px;
+  color: var(--bank-text-muted);
+  margin: 8px 0 40px;
+}
+.household-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--bank-text-muted);
+  margin-bottom: 10px;
+}
+.sidebar select {
+  margin-bottom: 26px;
+}
+.sidebar nav {
+  display: grid;
+  gap: 7px;
+}
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  width: 100%;
+  gap: 14px;
+  padding: 13px 16px;
+  text-decoration: none;
+  color: var(--bank-text-muted);
+  border-radius: 12px;
+  font-size: 14px;
+}
+.sidebar nav a app-icon {
+  flex: 0 0 22px;
+  font-size: 21px;
+}
+.sidebar nav a.active {
+  background: var(--bank-primary-container);
+  color: var(--bank-primary);
+  font-weight: 700;
+}
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+.sidebar-bottom small {
+  display: block;
+  font-size: 10px;
+  color: var(--bank-text-muted);
+  margin-top: 4px;
+}
+.avatar {
+  background: var(--bank-secondary-container);
+  color: var(--bank-secondary);
+  border-radius: 50%;
+  padding: 12px;
+}
+.sidebar-bottom button {
+  margin-left: auto;
+}
+.workspace {
+  margin-left: 244px;
+}
+.topbar {
+  height: auto;
+  min-height: 88px;
+  flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  border-bottom: 1px solid var(--bank-border);
+  padding: 0 40px;
+  background: var(--bank-surface);
+}
+.content {
+  max-width: 1320px;
+  margin: auto;
+  padding: 36px 40px 60px;
+}
+.mobile-brand,
+.bottom-nav {
+  display: none;
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 200px;
+    padding: 24px 16px;
+  }
+  .workspace {
+    margin-left: 200px;
+  }
+  .content {
+    padding: 24px;
+  }
+  .topbar {
+    padding: 0 24px;
+  }
+}
+@media (max-width: 650px) {
+  .sidebar {
+    display: none;
+  }
+  .workspace {
+    margin: 0;
+  }
+  .content {
+    padding: 24px 18px 100px;
+  }
+  .topbar {
+    padding: 0 18px;
+    gap: 12px;
+  }
+  .topbar .theme-label {
+    display: none;
+  }
+  .mobile-brand {
+    display: block;
+    font-weight: 900;
+    margin-right: auto;
+  }
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    inset-inline: 0;
+    display: flex;
+    background: var(--bank-surface);
+    border-top: 1px solid var(--bank-border);
+    padding: 10px 4px max(10px, env(safe-area-inset-bottom));
+    z-index: 5;
+    justify-content: space-around;
+  }
+  .bottom-nav a {
+    text-decoration: none;
+    color: var(--bank-text-muted);
+    font-size: 10px;
+    text-align: center;
+  }
+  .bottom-nav app-icon {
+    display: block;
+    font-size: 23px;
+    margin-bottom: 3px;
+  }
+  .bottom-nav .active {
+    color: var(--bank-primary);
+  }
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.secondary {
+  border: 1px solid var(--bank-border);
+  background: var(--bank-surface);
+  font-weight: 650;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.topbar {
+  padding-block: 14px;
+}
+@media (max-width: 650px) {
+  .topbar {
+    gap: 8px;
+    min-height: 70px;
+  }
+  .header-actions {
+    display: none;
+  }
+  .header-actions button {
+    flex: 1;
+    font-size: 11px;
+    padding: 10px 8px;
+  }
+}
+
+.bottom-nav app-icon {
+  display: flex;
+  margin: 0 auto 4px;
+}
+
+.mobile-settings {
+  display: none;
+}
+@media (max-width: 650px) {
+  .mobile-settings {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 10px;
+    color: var(--bank-text);
+    text-decoration: none;
+  }
+  .mobile-settings:hover,
+  .mobile-settings.active {
+    color: var(--bank-primary);
+    background: var(--bank-primary-container);
+  }
+  .mobile-settings[aria-disabled='true'] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

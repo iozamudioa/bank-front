@@ -1,0 +1,41 @@
+<span class="type-icon" [attr.data-type]="movement().type"><app-icon [name]="icon()" /></span>
+<div class="movement-description">
+  <strong>{{ title() }}</strong>
+  @if (movement().status === 'REVERSED') {
+    <span class="reversed">Revertido</span>
+  }
+  <small
+    >{{ location() }} — {{ movement().occurredAt | date: 'dd/MM/yyyy HH:mm' : '-0600' }} —
+    {{ movement().actor }}</small
+  >
+</div>
+<span class="movement-note"><span class="note-label">Descripción: </span>{{ description() }}</span>
+<span class="movement-actions">
+  <span>
+    @if (reversible()) {
+      <button
+        type="button"
+        [attr.aria-label]="'Revertir movimiento: ' + title()"
+        title="Revertir movimiento"
+        [disabled]="safety.locked() || safety.modalOpen()"
+        (click)="modals.reverseMovement(movement().id)"
+      >
+        <app-icon name="undo" size="sm" />
+      </button>
+    }
+  </span>
+  <span>
+    @if (editable()) {
+      <button
+        type="button"
+        [attr.aria-label]="'Editar movimiento: ' + title()"
+        title="Editar movimiento"
+        [disabled]="safety.locked() || safety.modalOpen()"
+        (click)="modals.editMovement(movement().id)"
+      >
+        <app-icon name="edit" size="sm" />
+      </button>
+    }
+  </span>
+</span>
+<span class="amount"><app-movement-amount [movement]="movement()" /></span>

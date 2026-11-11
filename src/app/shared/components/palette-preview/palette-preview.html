@@ -1,0 +1,14 @@
+<div class="preview" [ngStyle]="styles()" aria-hidden="true">
+  <div class="mini-nav"><span class="mini-brand">BANK</span><span class="mini-avatar">B</span></div>
+  <div class="mini-card">
+    <span class="mini-muted">Tu hogar, en orden</span
+    ><span class="mini-title">Cada peso tiene su destino.</span>
+    <div class="mini-lines"><span></span><span></span></div>
+    <span class="mini-button">Ver mi plan <app-icon name="arrow_forward" size="sm" /></span>
+  </div>
+  <div class="swatches">
+    @for (color of palette().previewColors; track color) {
+      <span [style.background]="color"></span>
+    }
+  </div>
+</div>

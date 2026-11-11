@@ -1,0 +1,51 @@
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.warning {
+  margin-top: 20px;
+}
+
+.available-balance {
+  background: var(--bank-primary-container);
+  color: var(--bank-text);
+  border: 1px solid var(--bank-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.balance-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bank-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+.available-balance .amount {
+  display: block;
+  font-size: 28px;
+  margin: 10px 0 8px;
+  color: var(--bank-primary);
+}
+.available-balance p {
+  margin: 0 0 6px;
+}
+.available-balance small {
+  font-size: 11px;
+  line-height: 1.5;
+}
+@media (max-width: 480px) {
+  .available-balance {
+    padding: 16px;
+  }
+  .available-balance .amount {
+    font-size: 25px;
+  }
+}

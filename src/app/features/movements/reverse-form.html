@@ -1,0 +1,56 @@
+@if (loading()) {
+  <p role="status">Consultando movimiento…</p>
+}
+@if (original(); as m) {
+  <h3>{{ title() }} · {{ m.amount | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</h3>
+  <p>{{ location() }}</p>
+  <p class="muted">
+    Se registrará una reversión que compensa el movimiento original y conserva su historial. Los
+    saldos se validan al confirmar.
+  </p>
+  <form [formGroup]="form" (ngSubmit)="review()">
+    <fieldset [disabled]="c.reviewing() || c.busy()">
+      <label
+        >Quincena de la reversión<select formControlName="periodId">
+          <option value="">Selecciona una abierta</option>
+          @for (p of s.periods(); track p.id) {
+            @if (p.status === 'OPEN') {
+              <option [value]="p.id">{{ p.startDate }} — {{ p.endDate }}</option>
+            }
+          }
+        </select></label
+      >
+      <label
+        >Motivo de la reversión<textarea formControlName="reason" rows="3" required></textarea>
+      </label>
+      <button class="primary" [disabled]="form.invalid || !c.connection.online()">
+        Revisar reversión
+      </button>
+    </fieldset>
+  </form>
+  @if (c.reviewing()) {
+    <p class="warning">¿Confirmas que deseas revertir este movimiento?</p>
+    <div class="actions">
+      <button type="button" [disabled]="c.busy() || c.uncertain()" (click)="c.cancel()">
+        Volver a editar
+      </button>
+      <button
+        type="button"
+        class="primary"
+        [disabled]="c.busy() || !c.connection.online()"
+        (click)="c.confirm()"
+      >
+        <app-icon name="check_circle" size="sm" />{{
+          c.busy()
+            ? 'Confirmando…'
+            : c.uncertain()
+              ? 'Reintentar misma reversión'
+              : 'Confirmar reversión'
+        }}
+      </button>
+    </div>
+  }
+}
+@if (c.message()) {
+  <p role="alert" class="error">{{ c.message() }}</p>
+}

@@ -1,0 +1,217 @@
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">UN HÁBITO QUE SUMA</div>
+    <h1>Registrar gasto</h1>
+    <p>Elige un sobre o el saldo libre de una cuenta.</p>
+  </div>
+</div>
+<div class="expense-layout" [class.has-review]="!!f.preview() || !!f.accountPreview()">
+  <section class="panel">
+    <form [formGroup]="form" (ngSubmit)="preview()">
+      <fieldset [disabled]="f.busy() || f.uncertain()">
+        <label
+          >Quincena<select
+            [value]="s.periodId()"
+            (change)="s.periodId.set($any($event.target).value); f.reset()"
+          >
+            @for (p of s.periods(); track p.id) {
+              <option [value]="p.id">
+                {{ p.startDate }} — {{ p.endDate }} — {{ p.status | statusLabel }}
+              </option>
+            }
+          </select></label
+        >
+        <label
+          >Origen del gasto<select formControlName="origin">
+            <option value="envelope">Desde un sobre</option>
+            <option value="account">Saldo libre de una cuenta</option>
+          </select></label
+        >
+        @if (origin() === 'envelope') {
+          <label
+            >¿De qué sobre sale?<select formControlName="targetEnvelopeId" aria-required="true">
+              <option value="">Selecciona un sobre</option>
+              @for (e of s.envelopes(); track e.id) {
+                @if (e.active) {
+                  <option [value]="e.id">
+                    {{ e.name }} — {{ e.balance | currency: 'MXN' : 'symbol-narrow' }}
+                  </option>
+                }
+              }
+            </select></label
+          >
+          @if (selectedEnvelope(); as envelope) {
+            <div class="selected-envelope-info" aria-live="polite">
+              <strong>{{ envelope.name }}</strong>
+              @if (selectedAccount(); as account) {
+                <span class="muted">{{ account.name }}</span>
+              }
+              @if (f.connection.online() && !s.loading() && !s.error()) {
+                <small
+                  >Disponible en el sobre:
+                  <strong>{{ envelope.balance | currency: 'MXN' : 'symbol-narrow' }}</strong></small
+                >
+              }
+            </div>
+          }
+        } @else {
+          <label
+            >Cuenta de pago<select formControlName="accountId" aria-required="true">
+              <option value="">Selecciona una cuenta</option>
+              @for (account of s.accounts(); track account.id) {
+                @if (account.active) {
+                  <option [value]="account.id">{{ account.name }}</option>
+                }
+              }
+            </select></label
+          >
+          @if (selectedAccount(); as account) {
+            <div class="selected-envelope-info" aria-live="polite">
+              <strong>{{ account.name }}</strong>
+              @if (f.connection.online() && !s.loading() && !s.error() && selectedFree() !== null) {
+                <span
+                  >Saldo libre:
+                  <strong>{{
+                    selectedFree() | currency: 'MXN' : 'symbol-narrow' : '1.2-2'
+                  }}</strong></span
+                >
+              } @else {
+                <span class="muted">Saldo libre no disponible.</span>
+              }
+              <small>Solo se usará dinero sin reservar. Tus sobres conservan su saldo.</small>
+            </div>
+          }
+        }
+        <label
+          >Importe en MXN
+          <div class="amount-input">
+            <input appMoneyInput formControlName="amount" required />
+          </div>
+          @if (form.controls.amount.touched && form.controls.amount.invalid) {
+            <small class="error"
+              >Usa un importe positivo con máximo dos decimales y 13 dígitos enteros.</small
+            >
+          }</label
+        ><label
+          >¿En qué lo gastaste?<input
+            formControlName="description"
+            placeholder="Por ejemplo: compra de carne"
+            maxlength="500"
+        /></label>
+        @if (s.period()?.status !== 'OPEN') {
+          <p class="warning">Selecciona una quincena abierta para registrar movimientos.</p>
+        }
+        <button
+          class="primary"
+          [disabled]="
+            form.invalid || f.busy() || !f.connection.online() || s.period()?.status !== 'OPEN'
+          "
+        >
+          Consultar y revisar gasto <app-icon name="arrow_forward" size="sm" />
+        </button>
+      </fieldset>
+    </form>
+  </section>
+  <section class="stack">
+    @if (f.success() && !f.modal) {
+      <div class="success" role="status">
+        El gasto fue registrado correctamente. Los saldos se consultaron de nuevo.
+      </div>
+    }
+    @if (f.error()) {
+      <div #expenseError class="error" role="alert">{{ f.error() }}</div>
+    }
+    @if (f.preview() || f.accountPreview()) {
+      <section #expenseReview class="panel">
+        @if (f.preview(); as p) {
+          <h2>Revisa tu gasto</h2>
+          <div class="row">
+            <span>Disponible en el sobre</span
+            ><strong>{{ p.targetBalance | currency: 'MXN' : 'symbol-narrow' }}</strong>
+          </div>
+          <div class="row">
+            <span>Gasto</span
+            ><strong>{{ p.requestedAmount | currency: 'MXN' : 'symbol-narrow' }}</strong>
+          </div>
+          @if (p.shortfall > 0) {
+            <p class="warning">
+              No tienes suficiente dinero en este sobre. Faltan
+              <strong>{{ p.shortfall | currency: 'MXN' : 'symbol-narrow' }}</strong>.
+            </p>
+            <app-funding-selector
+              [donors]="p.eligibleDonors"
+              [amounts]="amounts()"
+              [disabled]="f.busy() || f.uncertain()"
+              (changed)="f.setDonor($event.id, $event.value)"
+            />
+          }
+          <h3>Así quedarían tus sobres</h3>
+          @for (source of f.funding(); track source.envelopeId) {
+            <div class="row">
+              <div>
+                {{ name(source.envelopeId)
+                }}<small class="source"
+                  >Aporta {{ source.amount | currency: 'MXN' : 'symbol-narrow' }}</small
+                >
+              </div>
+              <strong>{{
+                f.after(source.envelopeId, balance(source.envelopeId))
+                  | currency: 'MXN' : 'symbol-narrow'
+              }}</strong>
+            </div>
+          }
+          @if (!f.covered()) {
+            <p class="muted">La suma de las aportaciones debe cubrir exactamente el gasto.</p>
+          }
+        }
+        @if (f.accountPreview(); as p) {
+          <h2>Revisa tu gasto desde cuenta</h2>
+          <p>{{ selectedAccount()?.name || p.accountId }}</p>
+          <div class="row">
+            <span>Saldo total actual</span
+            ><strong>{{ p.totalBefore | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+          </div>
+          <div class="row">
+            <span>Saldo libre actual</span
+            ><strong>{{ p.freeBefore | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+          </div>
+          <div class="row">
+            <span>Gasto</span
+            ><strong>−{{ p.amount | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+          </div>
+          <div class="row">
+            <span>Saldo total después</span
+            ><strong>{{ p.totalAfter | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+          </div>
+          <div class="row">
+            <span>Saldo libre después</span
+            ><strong>{{ p.freeAfter | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+          </div>
+          <p class="muted">El saldo reservado en sobres se conserva.</p>
+        }
+        @if (f.uncertain()) {
+          <p class="warning">
+            La confirmación requiere revisión. Los saldos del preview pueden haber cambiado.
+            Reintenta con la misma clave y datos antes de iniciar otro gasto.
+          </p>
+        }
+        <p class="muted">
+          El backend valida los saldos al confirmar. Este preview no reserva dinero.
+        </p>
+        <button
+          class="primary"
+          [disabled]="!f.covered() || f.busy() || !f.connection.online()"
+          (click)="f.confirm()"
+        >
+          <app-icon name="check_circle" size="sm" />{{
+            f.busy()
+              ? 'Confirmando…'
+              : f.uncertain()
+                ? 'Reintentar misma operación'
+                : 'Confirmar gasto'
+          }}
+        </button>
+      </section>
+    }
+  </section>
+</div>

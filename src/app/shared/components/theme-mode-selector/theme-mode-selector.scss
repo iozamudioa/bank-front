@@ -1,0 +1,65 @@
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+legend {
+  font-size: 13px;
+  font-weight: 650;
+  margin-bottom: 14px;
+}
+.segments {
+  display: flex;
+  gap: 6px;
+  border: 1px solid var(--bank-control-border);
+  border-radius: 14px;
+  padding: 5px;
+  background: var(--bank-background);
+  max-width: 540px;
+}
+.segments label {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 9px;
+  color: var(--bank-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.segments input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.segments label.selected {
+  color: var(--bank-on-primary);
+  background: var(--bank-primary);
+}
+.segments label:focus-within {
+  outline: 3px solid var(--bank-focus);
+  outline-offset: 3px;
+}
+.check {
+  width: 16px;
+}
+@media (max-width: 400px) {
+  .segments label {
+    gap: 5px;
+    font-size: 11px;
+    padding: 5px;
+  }
+  .check {
+    display: none;
+  }
+}

@@ -1,0 +1,77 @@
+.preview {
+  background: var(--bank-background);
+  padding: 16px;
+  border: 1px solid var(--bank-border);
+  border-radius: 12px;
+  color: var(--bank-text);
+}
+.mini-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.mini-brand {
+  font-weight: 850;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.mini-avatar {
+  font-size: 10px;
+  padding: 6px 9px;
+  border-radius: 50%;
+  color: var(--bank-primary);
+  background: var(--bank-primary-container);
+}
+.mini-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  background: var(--bank-surface);
+  border: 1px solid var(--bank-border);
+  border-radius: 10px;
+}
+.mini-muted {
+  font-size: 10px;
+  color: var(--bank-text-muted);
+}
+.mini-title {
+  font-size: 12px;
+  font-weight: 700;
+}
+.mini-lines {
+  display: flex;
+  gap: 6px;
+}
+.mini-lines span {
+  height: 5px;
+  width: 40%;
+  background: var(--bank-secondary-container);
+  border-radius: 4px;
+}
+.mini-lines span + span {
+  width: 20%;
+  background: var(--bank-primary-container);
+}
+.mini-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  background: var(--bank-primary);
+  color: var(--bank-on-primary);
+  font-size: 10px;
+  font-weight: 650;
+  padding: 7px 10px;
+  border-radius: 6px;
+}
+.swatches {
+  display: flex;
+  gap: 5px;
+  margin-top: 14px;
+}
+.swatches span {
+  height: 18px;
+  flex: 1;
+  border-radius: 5px;
+}

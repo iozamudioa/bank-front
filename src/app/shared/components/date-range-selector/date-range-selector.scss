@@ -1,0 +1,18 @@
+:host {
+  display: block;
+  margin-bottom: 20px;
+}
+.range-field {
+  width: 100%;
+}
+input {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+input:focus,
+input:focus-visible {
+  outline: 0;
+}

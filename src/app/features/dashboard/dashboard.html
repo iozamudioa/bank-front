@@ -1,0 +1,196 @@
+@if (!store.householdId()) {
+  <app-onboarding />
+} @else {
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">TU TRANQUILIDAD, EN NÚMEROS</div>
+      <h1>
+        Así va tu hogar<span class="hello"> <app-icon name="auto_awesome" size="sm" /></span>
+      </h1>
+      <p>Una mirada clara a tu dinero y a lo que viene.</p>
+    </div>
+    <button (click)="store.refresh()" [disabled]="store.loading()">
+      <app-icon name="refresh" size="sm" /> Actualizar
+    </button>
+  </div>
+  @if (!store.loading() && !store.accounts().length) {
+    <p class="warning">
+      Completa la configuración de tu hogar.
+      <a routerLink="/setup">Abrir asistente <app-icon name="arrow_forward" size="sm" /></a>
+    </p>
+  }
+  @if (store.loading()) {
+    <div class="panel empty" role="status">Consultando tus saldos…</div>
+  }
+  @if (store.dashboard(); as d) {
+    <section class="overview">
+      <div class="balance-card">
+        <div class="balance-label">
+          DINERO TOTAL <span><app-icon name="arrow_outward" size="sm" /></span>
+        </div>
+        <div class="total amount">{{ d.total | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</div>
+        <p>El dinero real de todas tus cuentas</p>
+        <div class="balance-split">
+          <div>
+            <small><app-icon name="payments" size="sm" /> Físico</small
+            ><strong>{{ physical() | currency: 'MXN' : 'symbol-narrow' }}</strong>
+          </div>
+          <div>
+            <small><app-icon name="account_balance" size="sm" /> Digital</small
+            ><strong>{{ digital() | currency: 'MXN' : 'symbol-narrow' }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="metric panel">
+        <div class="metric-icon violet"><app-icon name="mail" size="sm" /></div>
+        <p>Dinero reservado</p>
+        <strong class="amount">{{ d.reserved | currency: 'MXN' : 'symbol-narrow' }}</strong><small
+          >En tus sobres, listo para su destino.</small
+        >
+      </div>
+      <div class="metric panel">
+        <div class="metric-icon teal"><app-icon name="arrow_outward" size="sm" /></div>
+        <p>Sin asignar</p>
+        <strong class="amount">{{ d.free | currency: 'MXN' : 'symbol-narrow' }}</strong><small
+          >Disponible para apartar.<br />Las reservas ya están descontadas.</small
+        >
+      </div>
+    </section>
+    <div class="dashboard-columns">
+      <section class="panel">
+        <div class="section-title">
+          <h2>Tus sobres</h2>
+          <a routerLink="/envelopes">Ver todos <app-icon name="arrow_forward" size="sm" /></a>
+        </div>
+        @for (e of envelopePlans(); track e.id) {
+          <div class="envelope-entry">
+            <button
+              type="button"
+              class="envelope-open"
+              [attr.aria-label]="'Registrar gasto de ' + e.name"
+              [disabled]="!e.active || safety.locked() || safety.modalOpen()"
+              (click)="modals.expense(e.id)"
+            ></button>
+            <div class="envelope-row">
+              <div class="envelope-name">
+                <span class="envelope-icon"><app-icon name="mail" /></span>
+                <div>
+                  <strong>{{ e.name }}</strong><small>{{ e.category || 'Sin categoría' }}</small>
+                </div>
+              </div>
+              <span class="amount">{{ e.balance | currency: 'MXN' : 'symbol-narrow' }}</span>
+            </div>
+            @if (e.planned > 0) {
+              <div
+                class="envelope-progress"
+                role="progressbar"
+                [attr.aria-label]="'Saldo disponible de ' + e.name"
+                aria-valuemin="0"
+                [attr.aria-valuemax]="e.planned"
+                [attr.aria-valuenow]="e.cappedBalance"
+                [attr.aria-valuetext]="
+                  (e.balance | currency: 'MXN' : 'symbol-narrow') +
+                  ' disponibles de ' +
+                  (e.planned | currency: 'MXN' : 'symbol-narrow') +
+                  ' planeados'
+                "
+              >
+                <span class="envelope-fill" [style.width.%]="e.progress"></span>
+                @if (e.extra > 0) {
+                  <span
+                    class="envelope-excess"
+                    [style.width.%]="100 - e.planMarker"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="envelope-plan-limit"
+                    [style.left.%]="e.planMarker"
+                    aria-hidden="true"
+                    [title]="'Límite planeado: ' + (e.planned | currency: 'MXN' : 'symbol-narrow')"
+                  ></span>
+                }
+              </div>
+              <div class="envelope-plan-caption muted">
+                <span>Planeado: {{ e.planned | currency: 'MXN' : 'symbol-narrow' }}</span>
+                @if (e.extra > 0) {
+                  <span>Extra: {{ e.extra | currency: 'MXN' : 'symbol-narrow' }}</span>
+                }
+              </div>
+            } @else {
+              <small class="envelope-plan-caption muted">{{
+                store.period()
+                  ? 'Sin monto planeado en esta quincena'
+                  : 'Selecciona una quincena para ver lo planeado'
+              }}</small>
+            }
+          </div>
+        } @empty {
+          <p class="empty">Cada plan empieza con un sobre. Crea el primero.</p>
+        }
+      </section>
+      <section class="stack">
+        <div class="panel period-card">
+          <div class="eyebrow">A TU RITMO</div>
+          <h2>Tu quincena</h2>
+          <label
+            >Periodo seleccionado<select
+              [value]="store.periodId()"
+              (change)="store.periodId.set($any($event.target).value)"
+            >
+              @for (p of store.periods(); track p.id) {
+                <option [value]="p.id">{{ p.startDate }} — {{ p.endDate }}</option>
+              }
+            </select></label
+          >
+          @if (store.period(); as p) {
+            <span class="pill">{{
+              p.status === 'OPEN' ? 'Abierta' : p.status === 'CLOSED' ? 'Cerrada' : 'Borrador'
+            }}</span>
+            <div class="row">
+              <span>Ingreso planificado</span
+              ><strong>{{ p.expectedIncome | currency: 'MXN' : 'symbol-narrow' }}</strong>
+            </div>
+            <p class="muted">
+              El plan es una intención. Abrir una quincena no deposita ni aparta dinero.
+            </p>
+          } @else {
+            <p class="muted">Abre tu primera quincena para comenzar.</p>
+          }
+          <a routerLink="/budget-periods" class="section-link"
+            >Administrar quincenas <app-icon name="arrow_forward" size="sm"
+          /></a>
+        </div>
+        <div class="tip">
+          <span><app-icon name="auto_awesome" size="sm" /></span>
+          <div>
+            <strong>Un pequeño hábito, una gran diferencia.</strong>
+            <p>Registra tus gastos al momento y mantén tu plan al día.</p>
+            <button (click)="modals.expense()">
+              Registrar un gasto <app-icon name="arrow_forward" size="sm" />
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <section class="panel accounts-summary">
+      <div class="section-title">
+        <h2>¿Dónde está tu dinero?</h2>
+        <a routerLink="/accounts">Ver cuentas <app-icon name="arrow_forward" size="sm" /></a>
+      </div>
+      <div class="grid">
+        @for (a of d.accounts; track a.id) {
+          <div class="account-tile">
+            <span class="pill">{{ a.type === 'PHYSICAL' ? 'Físico' : 'Digital' }}</span>
+            <h3>{{ a.name }}</h3>
+            <strong class="amount">{{ a.total | currency: 'MXN' : 'symbol-narrow' }}</strong><small
+              >Libre: {{ a.free | currency: 'MXN' : 'symbol-narrow' }}</small
+            >
+          </div>
+        } @empty {
+          <p class="muted">Aún no hay cuentas.</p>
+        }
+      </div>
+    </section>
+    <app-recent-activity />
+  }
+}

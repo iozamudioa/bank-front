@@ -1,0 +1,59 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  font-size: 22px;
+  vertical-align: middle;
+  color: inherit;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+}
+:host([data-size='xs']) {
+  font-size: 16px;
+}
+:host([data-size='sm']) {
+  font-size: 18px;
+}
+:host([data-size='lg']) {
+  font-size: 28px;
+}
+:host([data-size='xl']) {
+  font-size: 40px;
+}
+:host([data-size='hero']) {
+  font-size: 80px;
+}
+.material-symbols-rounded {
+  display: block;
+  font-family: 'Material Symbols Rounded';
+  font-weight: 400;
+  font-style: normal;
+  font-size: inherit;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  width: 1em;
+  height: 1em;
+}
+:host(.filled) .material-symbols-rounded {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}

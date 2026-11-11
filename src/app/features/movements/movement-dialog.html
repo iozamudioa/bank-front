@@ -1,0 +1,73 @@
+@if (!s.householdId()) {
+  <p class="warning">Configura un hogar antes de registrar movimientos.</p>
+} @else {
+  <header class="movement-header">
+    <app-dialog-tabs
+      [items]="actions"
+      [selected]="action()"
+      [disabled]="safety.locked()"
+      (selectedChange)="select($event)"
+    />
+  </header>
+  <section class="movement-detail" aria-label="Datos del movimiento">
+    @if (action() !== 'opening') {
+      <label class="period-selector"
+        >Quincena<select
+          [disabled]="safety.locked()"
+          [value]="s.periodId()"
+          (change)="s.periodId.set($any($event.target).value)"
+        >
+          @for (p of s.periods(); track p.id) {
+            @if (p.status === 'OPEN') {
+              <option [value]="p.id">{{ p.startDate }} — {{ p.endDate }}</option>
+            }
+          }
+        </select></label
+      >
+    }
+    @for (item of actions; track item.id) {
+      <div
+        role="tabpanel"
+        [id]="'movement-panel-' + item.id"
+        [attr.aria-labelledby]="'movement-tab-' + item.id"
+        [hidden]="action() !== item.id"
+      >
+        @if (visited().includes(item.id)) {
+          @switch (item.id) {
+            @case ('income') {
+              <app-income-form [embedded]="true" />
+            }
+            @case ('allocate') {
+              <app-allocation-form [embedded]="true" />
+            }
+            @case ('reallocate') {
+              <app-reallocation-form [embedded]="true" />
+            }
+            @case ('transfer') {
+              <app-transfer-form [embedded]="true" />
+            }
+            @case ('envelopeTransfer') {
+              <app-envelope-transfer-form [embedded]="true" />
+            }
+            @case ('release') {
+              <app-release-form [embedded]="true" />
+            }
+            @case ('opening') {
+              <app-opening-form [embedded]="true" />
+            }
+          }
+        }
+      </div>
+    }
+  </section>
+  <footer class="movement-footer">
+    @if (activeForm(); as form) {
+      <app-movement-footer
+        [controller]="form"
+        [operation]="action()"
+        [label]="activeLabel()"
+        [requiresPeriod]="action() !== 'opening'"
+      />
+    }
+  </footer>
+}

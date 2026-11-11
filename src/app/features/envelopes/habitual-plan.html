@@ -1,0 +1,15 @@
+<p>Este monto se copiará a las próximas quincenas. No cambia saldos ni quincenas existentes.</p>
+<label
+  >Planeado habitual por quincena<input appMoneyInput [formControl]="amount" [readOnly]="busy()"
+/></label>
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+<button
+  type="button"
+  class="primary"
+  [disabled]="busy() || amount.invalid || !connection.online()"
+  (click)="save()"
+>
+  {{ busy() ? 'Guardando…' : 'Guardar plan habitual' }}
+</button>

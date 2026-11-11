@@ -1,0 +1,61 @@
+<section [class.panel]="!embedded()">
+  @if (!embedded()) {
+    <h2>Tu presupuesto habitual</h2>
+  }
+  @if (isNew()) {
+    <p class="muted">
+      Configura tu primera plantilla. Estos importes son planes, no dinero depositado.
+    </p>
+  }
+  <p class="muted">
+    Planificar no equivale a recibir ingresos ni reservar fondos. Esta plantilla se copia al crear
+    una quincena.
+  </p>
+  <button
+    type="button"
+    [disabled]="busy() || !s.householdId() || !connection.online()"
+    (click)="load(s.householdId())"
+  >
+    Recargar presupuesto
+  </button>
+  @if (busy() && !loaded()) {
+    <p class="muted" role="status">Consultando presupuesto…</p>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="busy() || !loaded()">
+      <label
+        >Ingreso esperado · MXN<input
+          appMoneyInput
+          formControlName="expectedIncome"
+          readonly
+          aria-describedby="expected-income-hint"
+        /><small id="expected-income-hint"
+          >Calculado automáticamente con lo planeado por quincena de tus sobres.</small
+        ></label
+      >
+      <div formArrayName="allocations">
+        @for (row of rows.controls; track row; let i = $index) {
+          <div [formGroupName]="i">
+            <label
+              >{{ name(row.controls.envelopeId.value) }} · MXN<input
+                formControlName="amount"
+                appMoneyInput
+            /></label>
+          </div>
+        }
+      </div>
+    </fieldset>
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    @if (saved() && !modal) {
+      <p class="success" role="status">Plantilla guardada.</p>
+    }
+    <button
+      class="primary"
+      [disabled]="form.invalid || busy() || !loaded() || !s.householdId() || !connection.online()"
+    >
+      <app-icon name="save" size="sm" />{{ busy() ? 'Guardando…' : 'Guardar presupuesto' }}
+    </button>
+  </form>
+</section>

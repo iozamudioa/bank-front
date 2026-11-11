@@ -1,0 +1,61 @@
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">PLANEA CON INTENCIÓN</div>
+    <h1>Presupuesto y quincenas</h1>
+    <p>El plan cambia. Tus remanentes permanecen.</p>
+  </div>
+  <div class="period-actions" role="group" aria-label="Acciones de quincena">
+    <button
+      type="button"
+      class="primary"
+      [disabled]="!s.householdId() || s.loading() || !!s.error()"
+      (click)="modals.period()"
+    >
+      <app-icon name="add" size="sm" />Abrir una quincena
+    </button>
+    <button
+      type="button"
+      [disabled]="!s.householdId() || s.loading() || !!s.error()"
+      (click)="modals.budget()"
+    >
+      <app-icon name="receipt_long" size="sm" />Presupuesto habitual
+    </button>
+    <button
+      type="button"
+      class="fund-period"
+      [disabled]="!fundingPeriod() || s.loading() || !!s.error()"
+      [title]="
+        fundingPeriod()
+          ? 'Quincena: ' + fundingPeriod()!.startDate + ' — ' + fundingPeriod()!.endDate
+          : 'Abre una quincena para cargar y distribuir sus saldos'
+      "
+      (click)="fund()"
+    >
+      <app-icon name="savings" size="sm" />Cargar y distribuir saldos
+    </button>
+  </div>
+</div>
+<div class="stack">
+  <section class="panel">
+    <h2>Historial de quincenas</h2>
+    @for (p of s.periods(); track p.id) {
+      <details>
+        <summary>{{ p.startDate }} — {{ p.endDate }} — {{ p.status | statusLabel }}</summary>
+        <p>Ingreso planificado: {{ p.expectedIncome | currency: 'MXN' : 'symbol-narrow' }}</p>
+        @for (line of p.lines; track line.envelopeId) {
+          <div class="row">
+            <span>{{ name(line.envelopeId) }}</span><strong>{{
+              line.amount | currency: 'MXN' : 'symbol-narrow'
+            }}</strong>
+          </div>
+        }
+        <button (click)="s.periodId.set(p.id)">Seleccionar periodo</button>
+        @if (p.status === 'OPEN') {
+          <button type="button" (click)="modals.periodClose(p.id)">Cerrar quincena</button>
+        }
+      </details>
+    } @empty {
+      <p class="empty">Todavía no hay quincenas.</p>
+    }
+  </section>
+</div>

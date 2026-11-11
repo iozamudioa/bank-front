@@ -1,0 +1,45 @@
+.toast-outlet {
+  position: fixed;
+  z-index: 1200;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
+  width: min(420px, calc(100vw - 32px));
+  display: grid;
+  gap: 10px;
+  max-height: 60dvh;
+  overflow-y: auto;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  border: 1px solid var(--bank-success);
+  border-radius: 12px;
+  background: var(--bank-success-container);
+  color: var(--bank-success);
+  box-shadow: var(--bank-shadow);
+  pointer-events: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.toast span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.toast button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: inherit;
+  padding: 8px;
+  min-width: 44px;
+}
+@media (max-width: 650px) {
+  .toast-outlet {
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+}

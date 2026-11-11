@@ -1,0 +1,52 @@
+.expense-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.expense-layout.has-review {
+  grid-template-columns: 1fr 1fr;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.amount-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--bank-border);
+  border-radius: 12px;
+}
+.amount-input input {
+  font-size: 35px;
+  border: 0;
+  min-width: 0;
+  font-weight: 700;
+}
+.source {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+}
+.panel > p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+@media (max-width: 850px) {
+  .expense-layout,
+  .expense-layout.has-review {
+    grid-template-columns: 1fr;
+  }
+}
+
+.selected-envelope-info {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  background: var(--bank-primary-container);
+  font-size: 12px;
+}

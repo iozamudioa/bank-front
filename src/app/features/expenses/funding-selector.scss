@@ -1,0 +1,16 @@
+.donor {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  align-items: center;
+  border-bottom: 1px solid var(--bank-border);
+  padding: 12px 0;
+}
+.donor small {
+  display: block;
+  margin-top: 7px;
+  font-weight: 400;
+}
+p {
+  font-size: 12px;
+  line-height: 1.6;
+}

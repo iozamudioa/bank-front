@@ -1,0 +1,66 @@
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">EL DÍA A DÍA DE TU HOGAR</div>
+    <h1>Movimientos</h1>
+    <p>Dinero que entra, sale y encuentra su destino.</p>
+  </div>
+</div>
+<button
+  class="primary"
+  [disabled]="safety.locked() || safety.modalOpen()"
+  (click)="modals.movement()"
+>
+  <app-icon name="add" size="sm" />Nuevo movimiento
+</button>
+<section class="panel history">
+  <h2>Tu actividad</h2>
+  <form [formGroup]="form" (ngSubmit)="load(0)" class="filters">
+    <label
+      >Quincena<select formControlName="periodId">
+        <option value="">Todas</option>
+        @for (p of s.periods(); track p.id) {
+          <option [value]="p.id">{{ p.startDate }} — {{ p.endDate }}</option>
+        }
+      </select></label
+    ><label
+      >Cuenta<select formControlName="accountId">
+        <option value="">Todas</option>
+        @for (a of s.accounts(); track a.id) {
+          <option [value]="a.id">{{ a.name }}</option>
+        }
+      </select></label
+    ><label
+      >Sobre<select formControlName="envelopeId">
+        <option value="">Todos</option>
+        @for (e of s.envelopes(); track e.id) {
+          <option [value]="e.id">{{ e.name }}</option>
+        }
+      </select></label
+    ><button class="primary" [disabled]="busy()">
+      <app-icon name="search" size="sm" />Filtrar
+    </button>
+  </form>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (busy()) {
+    <p role="status">Consultando movimientos…</p>
+  }
+  <div class="movement-list">
+    @for (m of rows(); track m.id) {
+      <app-movement-row [movement]="m" [related]="rows()" />
+    } @empty {
+      @if (!busy()) {
+        <p class="empty">No hay movimientos para estos filtros.</p>
+      }
+    }
+  </div>
+  <div class="actions">
+    <button [disabled]="page() === 0 || busy()" (click)="load(page() - 1)">
+      <app-icon name="arrow_back" size="sm" /> Anterior</button
+    ><span class="muted">Página {{ page() + 1 }}</span
+    ><button [disabled]="rows().length < 25 || busy()" (click)="load(page() + 1)">
+      Siguiente <app-icon name="arrow_forward" size="sm" />
+    </button>
+  </div>
+</section>

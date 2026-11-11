@@ -1,0 +1,80 @@
+@let active = controller();
+<div class="review-content">
+  @if (active.c.message()) {
+    <p class="operation-message warning" role="status">{{ active.c.message() }}</p>
+  }
+  @if (active.c.reviewing()) {
+    <div class="review-summary" aria-live="polite">
+      <div class="review-heading">
+        <strong>{{ label() }}</strong><strong class="amount">{{
+          amount() | currency: 'MXN' : 'symbol-narrow'
+        }}</strong>
+      </div>
+      <p class="projection-caption muted">Resultado estimado al confirmar</p>
+      <div class="projected-balances">
+        @for (row of projection(); track row.key) {
+          <div class="projected-row">
+            <div class="projected-name">
+              <strong>{{ row.name }}</strong><small class="muted">{{ row.scope }}</small>
+            </div>
+            <strong class="amount projected-change"
+              >{{ row.change < 0 ? '−' : '+'
+              }}{{ absolute(row.change) | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong
+            >
+            <span class="projected-total"
+              >Total
+              <strong class="amount">{{
+                row.after === null
+                  ? 'No disponible'
+                  : (row.after | currency: 'MXN' : 'symbol-narrow' : '1.2-2')
+              }}</strong></span
+            >
+          </div>
+        }
+      </div>
+      <p class="projection-note muted">
+        Los saldos se validan al confirmar.
+        @if (operation() === 'allocate' || operation() === 'release') {
+          El total de la cuenta no cambia.
+        }
+      </p>
+    </div>
+    @if (active.c.uncertain()) {
+      <p class="operation-message warning" role="alert">
+        La confirmación está pendiente. Reintenta con los mismos datos; no inicies otro movimiento.
+      </p>
+    }
+  }
+</div>
+@if (active.c.reviewing()) {
+  <div class="footer-actions">
+    <button
+      type="button"
+      [disabled]="active.c.busy() || active.c.uncertain()"
+      (click)="active.c.cancel()"
+    >
+      Volver a editar
+    </button>
+    <button
+      type="button"
+      class="primary"
+      [disabled]="active.c.busy() || !active.c.connection.online()"
+      (click)="active.c.confirm()"
+    >
+      <app-icon name="check_circle" size="sm" />{{
+        active.c.busy()
+          ? 'Confirmando…'
+          : active.c.uncertain()
+            ? 'Reintentar confirmación'
+            : 'Aceptar'
+      }}
+    </button>
+  </div>
+} @else {
+  <div class="footer-actions">
+    <span class="muted footer-hint">Revisa los datos antes de confirmar.</span
+    ><button type="button" class="primary" [disabled]="reviewDisabled()" (click)="review()">
+      <app-icon name="receipt_long" size="sm" />Revisar operación
+    </button>
+  </div>
+}

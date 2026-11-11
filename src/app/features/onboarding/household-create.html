@@ -1,0 +1,10 @@
+<form [formGroup]="form" (ngSubmit)="create()">
+  <label>Nombre de tu hogar<input formControlName="name" placeholder="Mi hogar" required /></label
+  ><label>Tu nombre visible<input formControlName="displayName" required /></label>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  <button class="primary" [disabled]="form.invalid || busy()">
+    Crear mi hogar <app-icon name="arrow_forward" size="sm" />
+  </button>
+</form>

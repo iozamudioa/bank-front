@@ -1,0 +1,49 @@
+<div class="period-plan" [formGroup]="form()">
+  @if (open().length || form().controls.periodId.value) {
+    @if (fixedPeriodId()) {
+      <p class="muted">Quincena: {{ selected()?.startDate }} — {{ selected()?.endDate }}</p>
+    } @else {
+      <label
+        >Quincena abierta
+        <select formControlName="periodId">
+          <option value="">Selecciona una quincena</option>
+          @if (unavailableSelection()) {
+            <option [value]="form().controls.periodId.value" disabled>
+              Quincena seleccionada —
+              {{ selected()?.status === 'CLOSED' ? 'Cerrada' : 'No disponible' }}
+            </option>
+          }
+          @for (period of open(); track period.id) {
+            <option [value]="period.id">{{ period.startDate }} — {{ period.endDate }}</option>
+          }
+        </select>
+      </label>
+    }
+    @if (unavailableSelection()) {
+      <p class="warning" role="status">
+        {{
+          fixedPeriodId()
+            ? 'Esta quincena ya no está abierta. Cierra la guía y elige una quincena abierta para guardar lo planeado.'
+            : 'Esta quincena ya no está abierta. Elige otra abierta para guardar lo planeado.'
+        }}
+      </p>
+    }
+    <label
+      >Planeado para esta quincena{{ optional() ? ' (opcional)' : '' }}
+      <input appMoneyInput formControlName="amount" aria-describedby="period-plan-hint" />
+      @if (form().controls.amount.touched && form().controls.amount.invalid) {
+        <small class="error"
+          >Ingresa un importe válido, mayor o igual a $0.00 y con máximo dos decimales.</small
+        >
+      }
+    </label>
+    <p id="period-plan-hint" class="muted">
+      Este monto es un plan: no aparta dinero ni cambia el presupuesto habitual.
+    </p>
+  } @else {
+    <p class="muted" role="status">
+      No hay una quincena abierta para un ajuste específico. El plan habitual se copiará al abrir
+      una.
+    </p>
+  }
+</div>

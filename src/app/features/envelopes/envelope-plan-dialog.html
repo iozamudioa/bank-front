@@ -1,0 +1,18 @@
+<p>
+  Define lo planeado para <strong>{{ envelope()?.name || 'este sobre' }}</strong>.
+</p>
+<form [formGroup]="form" (ngSubmit)="save()">
+  <fieldset [disabled]="busy()">
+    <app-period-plan-fields [form]="form" />
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    <button
+      type="submit"
+      class="primary"
+      [disabled]="form.invalid || busy() || !connection.online() || !envelope()?.active"
+    >
+      <app-icon name="save" size="sm" />{{ busy() ? 'Guardando…' : 'Guardar plan' }}
+    </button>
+  </fieldset>
+</form>

@@ -1,0 +1,16 @@
+.steps {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.steps button {
+  font-size: 11px;
+  color: var(--bank-text-muted);
+}
+.steps button.selected {
+  background: var(--bank-primary-container);
+  color: var(--bank-primary);
+}
+p {
+  line-height: 1.7;
+}

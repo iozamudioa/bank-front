@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+const root = 'dist/bank/browser/';
+const manifest = JSON.parse(readFileSync(root + 'manifest.webmanifest', 'utf8'));
+const sw = JSON.parse(readFileSync(root + 'ngsw.json', 'utf8'));
+assert.equal(manifest.name, 'BANK');
+assert.equal(manifest.display, 'standalone');
+assert.equal(sw.dataGroups.length, 0);
+for (const icon of manifest.icons) assert.ok(existsSync(root + icon.src));
+assert.ok(existsSync(root + 'ngsw-worker.js'));
+assert.ok(existsSync(root + 'theme-init.js'));
+assert.ok(sw.hashTable['/theme-init.js']);
+assert.ok(sw.hashTable['/fonts/material-symbols-rounded.woff2']);
+assert.ok(!Object.keys(sw.hashTable).some((p) => p.startsWith('/api/')));
+assert.ok(sw.navigationUrls.some((rule) => !rule.positive && rule.regex.includes('api')));
+console.log('PWA OK: manifest, iconos, worker y cache solo de recursos estaticos.');

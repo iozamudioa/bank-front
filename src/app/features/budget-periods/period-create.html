@@ -1,0 +1,55 @@
+<section>
+  <p class="muted">
+    Se copia la plantilla actual. Después te guiaremos para registrar ingresos, transferir entre
+    cuentas y apartar dinero en tus sobres. Cada operación requiere tu confirmación.
+  </p>
+  <form [formGroup]="form" (ngSubmit)="create()">
+    <fieldset [disabled]="busy() || !!flow.confirmation()">
+      <app-date-range-selector formControlName="range" />
+
+      <button
+        class="primary"
+        [disabled]="form.invalid || busy() || !!flow.confirmation() || !s.householdId()"
+      >
+        <app-icon name="check" size="sm" />{{ busyLabel() }}
+      </button>
+    </fieldset>
+  </form>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (flow.confirmation(); as periods) {
+    <section class="warning confirmation" role="alert" aria-labelledby="period-close-title">
+      <h3 id="period-close-title">
+        {{
+          periods.length === 1
+            ? 'Se cerrará la quincena anterior'
+            : 'Se cerrarán las quincenas abiertas'
+        }}
+      </h3>
+      <p>
+        {{
+          periods.length === 1
+            ? 'Ya existe una quincena abierta. Se cerrará antes de abrir la nueva.'
+            : 'Ya existen varias quincenas abiertas. Se cerrarán las siguientes antes de abrir la nueva.'
+        }}
+      </p>
+      <ul>
+        @for (period of periods; track period.id) {
+          <li>{{ period.startDate }} — {{ period.endDate }}</li>
+        }
+      </ul>
+      <p>
+        Los saldos y remanentes se conservan. Después del cierre no podrás registrar movimientos en
+        estos periodos.
+      </p>
+      <p class="question">¿Estás de acuerdo?</p>
+      <div class="confirmation-actions">
+        <button #declineButton type="button" [disabled]="busy()" (click)="flow.cancel()">No</button>
+        <button type="button" class="primary" [disabled]="busy()" (click)="confirm()">
+          <app-icon name="check" size="sm" />{{ busy() ? busyLabel() : 'Sí, cerrar y abrir nueva' }}
+        </button>
+      </div>
+    </section>
+  }
+</section>

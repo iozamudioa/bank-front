@@ -1,0 +1,20 @@
+.wizard-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.wizard-steps button {
+  font-size: 12px;
+  color: var(--bank-text-muted);
+}
+.wizard-steps .selected {
+  background: var(--bank-primary-container);
+  color: var(--bank-primary);
+}
+[hidden] {
+  display: none !important;
+}
+.actions {
+  margin-top: 28px;
+}

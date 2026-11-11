@@ -1,0 +1,77 @@
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+legend {
+  font-size: 13px;
+  font-weight: 650;
+  margin-bottom: 16px;
+}
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.palette-option {
+  position: relative;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 2px solid var(--bank-border);
+  border-radius: 16px;
+  cursor: pointer;
+  background: var(--bank-surface);
+  min-width: 0;
+}
+.palette-option:hover {
+  background: var(--bank-hover);
+}
+.palette-option.selected {
+  border-color: var(--bank-primary);
+}
+.palette-option:focus-within {
+  outline: 3px solid var(--bank-focus);
+  outline-offset: 3px;
+}
+.palette-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.option-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.selection-mark {
+  color: var(--bank-primary);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.description {
+  color: var(--bank-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  flex: 1;
+}
+.selection-label {
+  color: var(--bank-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+@media (max-width: 600px) {
+  .palette-grid {
+    grid-template-columns: 1fr;
+  }
+}

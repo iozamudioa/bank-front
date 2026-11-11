@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.transfer {
+  display: grid;
+  gap: 4px;
+}

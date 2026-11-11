@@ -1,0 +1,23 @@
+<header class="modal-header">
+  <div>
+    <p class="eyebrow">BANK · TU HOGAR</p>
+    <h2 id="bank-modal-title">{{ data.title }}</h2>
+  </div>
+  <button
+    type="button"
+    aria-label="Cerrar modal"
+    [disabled]="state.busy() || safety.locked()"
+    (click)="close()"
+  >
+    <app-icon name="close" size="sm" />
+  </button>
+</header>
+<div class="modal-body">
+  <ng-container *ngComponentOutlet="data.component; inputs: data.inputs" />
+</div>
+@if (safety.locked() && !data.framed) {
+  <p class="warning modal-notice" role="status">
+    Termina o cancela la operación antes de cerrar. Si la confirmación es incierta, reintenta con
+    los mismos datos.
+  </p>
+}

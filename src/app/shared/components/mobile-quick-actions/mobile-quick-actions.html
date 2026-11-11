@@ -1,0 +1,49 @@
+@if (expanded()) {
+  <button
+    type="button"
+    class="dismiss"
+    aria-label="Cerrar acciones rápidas"
+    (click)="close()"
+  ></button>
+}
+<div class="quick-actions">
+  @if (expanded()) {
+    <div
+      id="mobile-financial-actions"
+      class="quick-options"
+      role="group"
+      aria-label="Acciones de dinero"
+    >
+      <button
+        type="button"
+        class="quick-option"
+        aria-label="Nuevo movimiento"
+        title="Nuevo movimiento"
+        (click)="open('movement')"
+      >
+        <app-icon name="swap_horiz" />
+      </button>
+      <button
+        type="button"
+        class="quick-option"
+        aria-label="Registrar gasto"
+        title="Registrar gasto"
+        (click)="open('expense')"
+      >
+        <app-icon name="receipt_long" />
+      </button>
+    </div>
+  }
+  <button
+    #toggle
+    type="button"
+    class="fab-toggle"
+    [attr.aria-label]="expanded() ? 'Cerrar acciones rápidas' : 'Abrir acciones rápidas'"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="expanded() ? 'mobile-financial-actions' : null"
+    [disabled]="safety.locked() || safety.modalOpen() || !store.householdId()"
+    (click)="expanded.set(!expanded())"
+  >
+    <app-icon [name]="expanded() ? 'close' : 'add'" size="lg" />
+  </button>
+</div>

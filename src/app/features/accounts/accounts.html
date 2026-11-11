@@ -1,0 +1,24 @@
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">EL ORIGEN DE TUS PLANES</div>
+    <h1>Tus cuentas</h1>
+    <p>Dinero físico y digital, siempre en su lugar.</p>
+  </div>
+  <button class="primary" [disabled]="!s.householdId()" (click)="modals.account()">
+    <app-icon name="add" size="sm" />Crear cuenta
+  </button>
+</div>
+<div class="grid">
+  @for (a of s.accounts(); track a.id) {
+    <article class="panel">
+      <span class="pill">{{ a.type === 'PHYSICAL' ? 'Físico' : 'Digital' }}</span>
+      <h2>{{ a.name }}</h2>
+      <p class="amount balance">{{ a.balance | currency: 'MXN' : 'symbol-narrow' }}</p>
+      <a routerLink="/movements" [queryParams]="{ accountId: a.id }"
+        >Ver movimientos <app-icon name="arrow_forward" size="sm"
+      /></a>
+    </article>
+  } @empty {
+    <p class="empty">No hay cuentas configuradas.</p>
+  }
+</div>

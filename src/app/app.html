@@ -1,0 +1,142 @@
+@if (!ready) {
+  <main class="login">
+    <section class="login-story">
+      <div class="brand">B<span>▲</span>NK</div>
+      <p class="eyebrow">FINANZAS EN FAMILIA</p>
+      <h1>Cada peso tiene<br />su destino.</h1>
+      <p>Tu dinero, tus planes y la tranquilidad de tener todo en un solo lugar.</p>
+      <div class="orbit">
+        <app-icon name="home" size="hero" /><span>Un hogar.<br />Un plan compartido.</span>
+      </div>
+    </section>
+    <section class="login-form">
+      <div class="badge">BIENVENIDO A CASA</div>
+      <h2>Vamos a poner todo en orden.</h2>
+      <p>Accede con tu usuario para continuar.</p>
+      <form [formGroup]="form" (ngSubmit)="login()">
+        <label>Usuario<input formControlName="username" autocomplete="username" required /></label
+        ><label
+          >Contraseña<input
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            required
+        /></label>
+        @if (error) {
+          <p role="alert" class="error">{{ error }}</p>
+        }
+        <button class="primary" [disabled]="form.invalid || busy || !connection.online()">
+          {{ busy ? 'Conectando…' : 'Entrar a mi hogar' }}
+          @if (!busy) {
+            <app-icon name="arrow_forward" size="sm" />
+          }
+        </button>
+      </form>
+    </section>
+  </main>
+} @else {
+  <aside class="sidebar">
+    <a routerLink="/dashboard" class="brand">B<span>▲</span>NK</a>
+    <p class="tagline">Cada peso tiene su destino.</p>
+    <div class="household-label">MI HOGAR</div>
+    <select
+      aria-label="Hogar activo"
+      [disabled]="safety.locked() || safety.modalOpen()"
+      [value]="store.householdId()"
+      (change)="store.select($any($event.target).value)"
+    >
+      @for (h of store.households(); track h.id) {
+        <option [value]="h.id">{{ h.name }}</option>
+      }
+    </select>
+    <nav>
+      @for (link of links; track link[0]) {
+        <a [routerLink]="link[0]" routerLinkActive="active" #routeState="routerLinkActive"
+          ><app-icon [name]="link[1]" [filled]="routeState.isActive" />{{ link[2] }}</a
+        >
+      }
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="avatar">{{ session.username().slice(0, 1).toUpperCase() }}</div>
+      <span>{{ session.username() }}<small>Tu espacio familiar</small></span
+      ><button
+        aria-label="Cerrar sesión"
+        [disabled]="safety.locked() || safety.modalOpen()"
+        (click)="logout()"
+      >
+        <app-icon name="logout" />
+      </button>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <span class="brand mobile-brand" role="img" aria-label="BANK"
+        >B<span aria-hidden="true">▲</span>NK</span
+      ><button (click)="theme.cycle()" aria-label="Cambiar tema">
+        <app-icon [name]="theme.effectiveMode() === 'dark' ? 'dark_mode' : 'light_mode'" /><span
+          class="theme-label"
+          >{{ theme.modeLabel() }}</span
+        >
+      </button>
+      <a
+        class="mobile-settings"
+        [routerLink]="safety.locked() || safety.modalOpen() ? null : '/settings'"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        aria-label="Configuración"
+        title="Configuración"
+        [attr.aria-disabled]="safety.locked() || safety.modalOpen()"
+        [tabIndex]="safety.locked() || safety.modalOpen() ? -1 : 0"
+      >
+        <app-icon name="settings" />
+      </a>
+      <div class="header-actions">
+        <button
+          class="secondary"
+          [disabled]="safety.locked() || safety.modalOpen() || !store.householdId()"
+          (click)="modals.movement()"
+        >
+          <app-icon name="add" size="sm" />Nuevo movimiento</button
+        ><button
+          matButton="filled"
+          class="primary"
+          [disabled]="safety.locked() || safety.modalOpen() || !store.householdId()"
+          (click)="modals.expense()"
+        >
+          <app-icon name="receipt_long" size="sm" matButtonIcon />Registrar gasto
+        </button>
+      </div>
+    </header>
+    @if (!connection.online()) {
+      <p class="warning" role="alert">
+        Sin conexión. Los saldos pueden estar desactualizados. Las operaciones requieren conexión
+        con BANK API.
+      </p>
+    }
+    @if (modals.error()) {
+      <p class="error" role="alert">{{ modals.error() }}</p>
+    }
+    @if (store.error()) {
+      <div class="error" role="alert">
+        {{ store.error() }} <button (click)="store.refresh()">Reintentar</button>
+      </div>
+    }
+    @if (safety.locked()) {
+      <p class="warning" role="status">
+        Termina o cancela la operación actual antes de cambiar de pantalla. Si la confirmación es
+        incierta, reintenta la misma operación.
+      </p>
+    }
+    <main class="content"><router-outlet /></main>
+  </div>
+  <app-mobile-quick-actions />
+  <nav class="bottom-nav">
+    @for (link of links.slice(0, 5); track link[0]) {
+      <a [routerLink]="link[0]" routerLinkActive="active" #routeState="routerLinkActive"
+        ><app-icon [name]="link[1]" [filled]="routeState.isActive" />{{ link[2] }}</a
+      >
+    }
+  </nav>
+}
+
+<app-toast-outlet />

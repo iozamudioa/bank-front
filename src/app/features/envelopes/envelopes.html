@@ -1,0 +1,67 @@
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">CADA PESO TIENE SU DESTINO</div>
+    <h1>Tus sobres</h1>
+    <p>Reserva para lo importante. Disfruta con tranquilidad.</p>
+  </div>
+  <button class="primary" [disabled]="!s.householdId()" (click)="modals.envelope()">
+    <app-icon name="add" size="sm" />Crear sobre
+  </button>
+</div>
+<div class="grid">
+  @for (e of s.envelopes(); track e.id) {
+    <article class="panel envelope-card">
+      <button
+        type="button"
+        class="envelope-open"
+        [attr.aria-label]="'Registrar gasto de ' + e.name"
+        [disabled]="!e.active || safety.locked() || safety.modalOpen()"
+        (click)="modals.expense(e.id)"
+      >
+        <div class="section-title">
+          <span class="envelope-symbol"><app-icon name="mail" size="lg" /></span
+          ><span class="pill">{{
+            account(e.accountId)?.type === 'PHYSICAL' ? 'Físico' : 'Digital'
+          }}</span>
+        </div>
+        <h2>{{ e.name }}</h2>
+        <small>{{ account(e.accountId)?.name }} — {{ e.category || 'Sin categoría' }}</small>
+        <p class="amount balance">{{ e.balance | currency: 'MXN' : 'symbol-narrow' }}</p>
+      </button>
+      <p class="muted">
+        Planeado habitual:
+        {{
+          e.habitualAmount === null
+            ? 'Sin configurar'
+            : (e.habitualAmount | currency: 'MXN' : 'symbol-narrow' : '1.2-2')
+        }}
+      </p>
+      <div class="actions">
+        <button
+          type="button"
+          class="plan-action"
+          [disabled]="!e.active || safety.locked() || safety.modalOpen()"
+          (click)="modals.habitualPlan(e.id)"
+        >
+          Plan habitual
+        </button>
+        @if (e.active && hasOpenPeriod()) {
+          <button
+            type="button"
+            class="plan-action"
+            [attr.aria-label]="'Editar lo planeado de ' + e.name"
+            [disabled]="safety.locked() || safety.modalOpen()"
+            (click)="modals.envelopePlan(e.id)"
+          >
+            <app-icon name="calendar_month" size="sm" />Solo esta quincena
+          </button>
+        }
+        <a class="history-link" routerLink="/movements" [queryParams]="{ envelopeId: e.id }"
+          >Historial <app-icon name="arrow_forward" size="sm"
+        /></a>
+      </div>
+    </article>
+  } @empty {
+    <p class="empty">Crea un sobre para cada destino de tu presupuesto.</p>
+  }
+</div>

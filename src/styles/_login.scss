@@ -1,0 +1,115 @@
+app-root .login {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+app-root .login-story {
+  background: var(--bank-hero);
+  color: var(--bank-on-hero);
+  padding: 64px 12%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+app-root .login-story .brand span {
+  color: var(--bank-hero-accent);
+}
+app-root .login-story .brand {
+  color: var(--bank-on-hero);
+  margin-bottom: 80px;
+}
+app-root .login-story h1 {
+  font-size: clamp(40px, 4vw, 70px);
+  line-height: 1.1;
+  letter-spacing: -3px;
+  margin: 20px 0;
+}
+app-root .login-story p {
+  max-width: 360px;
+  line-height: 1.8;
+  color: var(--bank-hero-muted);
+}
+app-root .orbit {
+  font-size: 100px;
+  color: var(--bank-hero-accent);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 40px;
+}
+app-root .orbit span {
+  font-size: 15px;
+  color: var(--bank-on-hero);
+  line-height: 1.8;
+}
+app-root .login-form {
+  align-self: center;
+  padding: 60px 15%;
+  max-width: 650px;
+}
+app-root .login-form h2 {
+  font-size: 32px;
+  letter-spacing: -1px;
+}
+app-root .login-form p,
+app-root .login-form small {
+  color: var(--bank-text-muted);
+  line-height: 1.6;
+}
+app-root .login-form form {
+  margin: 30px 0;
+}
+app-root .login-form .primary {
+  width: 100%;
+  margin-top: 10px;
+}
+app-root .badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--bank-primary);
+}
+@media (max-width: 650px) {
+  app-root .login {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+  }
+  app-root .login-story {
+    padding: max(24px, env(safe-area-inset-top)) 24px 8px;
+    background: var(--bank-background);
+    color: var(--bank-text);
+  }
+  app-root .login-story .brand {
+    margin-bottom: 0;
+    font-size: 30px;
+    color: var(--bank-text);
+  }
+  app-root .login-story h1,
+  app-root .login-story p {
+    display: none;
+  }
+  app-root .login-story .brand span {
+    color: var(--bank-primary);
+  }
+  app-root .orbit {
+    display: none;
+  }
+  app-root .login-form {
+    align-self: start;
+    width: 100%;
+    max-width: 460px;
+    margin-inline: auto;
+    padding: 24px 24px max(32px, env(safe-area-inset-bottom));
+  }
+  app-root .login-form input {
+    font-size: 16px;
+    min-height: 48px;
+  }
+  app-root .login-form form {
+    margin-block: 24px 0;
+  }
+  app-root .login-form h2 {
+    font-size: 26px;
+  }
+}

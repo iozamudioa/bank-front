@@ -1,0 +1,21 @@
+<section class="panel">
+  <div class="section-title">
+    <h2>Actividad reciente</h2>
+    <a routerLink="/movements">Ver movimientos <app-icon name="arrow_forward" size="sm" /></a>
+  </div>
+  @if (busy()) {
+    <p class="muted" role="status">Consultando actividad…</p>
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  <div class="movement-list">
+    @for (m of rows(); track m.id) {
+      <app-movement-row [movement]="m" [related]="rows()" />
+    } @empty {
+      @if (!busy() && !error()) {
+        <p class="empty">Tus primeros movimientos aparecerán aquí.</p>
+      }
+    }
+  </div>
+</section>

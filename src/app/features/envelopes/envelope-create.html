@@ -1,0 +1,61 @@
+<section>
+  <form [formGroup]="form" (ngSubmit)="create()">
+    <fieldset [disabled]="busy() || !!createdEnvelope() || uncertain()">
+      <div class="form-grid">
+        <label>Nombre<input formControlName="name" required /></label>
+        <label
+          >Cuenta<select formControlName="accountId" required>
+            <option value="">Selecciona una cuenta</option>
+            @for (account of s.accounts(); track account.id) {
+              <option [value]="account.id">{{ account.name }}</option>
+            }
+          </select></label
+        >
+        <label
+          >Planeado habitual por quincena<input
+            appMoneyInput
+            formControlName="habitualAmount"
+            required
+          /><small>Se usará en próximas quincenas. No aparta dinero.</small></label
+        >
+        <label>Categoría<input formControlName="category" /></label>
+        <label
+          >Finalidad<select formControlName="type">
+            <option value="SPENDING">Gastos</option>
+            <option value="SAVINGS">Ahorro</option>
+            <option value="GOAL">Meta</option>
+          </select></label
+        >
+      </div>
+    </fieldset>
+    <fieldset [disabled]="busy() || uncertain()">
+      <app-period-plan-fields
+        [form]="form.controls.plan"
+        [optional]="!createdEnvelope() && !planPeriodId()"
+        [fixedPeriodId]="planPeriodId()"
+      />
+    </fieldset>
+    @if (createdEnvelope() && !busy()) {
+      <p class="muted">El reintento solo guardará el plan; no creará otro sobre.</p>
+    }
+    @if (error()) {
+      <p role="alert" class="error">{{ error() }}</p>
+    }
+    <button
+      type="submit"
+      class="primary"
+      [disabled]="form.invalid || busy() || !s.householdId() || !connection.online()"
+    >
+      <app-icon [name]="createdEnvelope() ? 'save' : 'add'" size="sm" />
+      {{
+        busy()
+          ? 'Guardando…'
+          : uncertain()
+            ? 'Reintentar misma creación'
+            : createdEnvelope()
+              ? 'Reintentar guardar plan'
+              : 'Crear sobre'
+      }}
+    </button>
+  </form>
+</section>

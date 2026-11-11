@@ -1,0 +1,282 @@
+.hello {
+  color: var(--bank-primary);
+}
+.overview {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.balance-card {
+  background: var(--bank-hero);
+  color: var(--bank-on-hero);
+  padding: 27px;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.balance-card:after {
+  content: '';
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border: 30px solid var(--bank-hero-decoration);
+  border-radius: 50%;
+  right: -40px;
+  top: -40px;
+  pointer-events: none;
+}
+.balance-label {
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: var(--bank-hero-muted);
+  display: flex;
+  justify-content: space-between;
+}
+.total {
+  font-size: 38px;
+  margin-top: 20px;
+}
+.balance-card p {
+  font-size: 11px;
+  color: var(--bank-hero-muted);
+}
+.balance-split {
+  display: flex;
+  gap: 40px;
+  border-top: 1px solid var(--bank-hero-border);
+  margin-top: 25px;
+  padding-top: 17px;
+}
+.balance-split small {
+  display: block;
+  color: var(--bank-hero-muted);
+  font-size: 11px;
+  margin-bottom: 7px;
+}
+.balance-split strong {
+  font-size: 17px;
+}
+.metric-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+  border-radius: 12px;
+}
+.violet {
+  background: var(--bank-secondary-container);
+  color: var(--bank-secondary);
+}
+.teal {
+  background: var(--bank-primary-container);
+  color: var(--bank-primary);
+}
+.metric p {
+  color: var(--bank-text-muted);
+  margin: 22px 0 10px;
+  font-size: 12px;
+}
+.metric strong {
+  font-size: 27px;
+  display: block;
+}
+.metric small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 15px;
+}
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 24px;
+}
+.envelope-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.envelope-name strong {
+  font-size: 13px;
+}
+.envelope-name small {
+  display: block;
+  font-size: 10px;
+  margin-top: 6px;
+}
+.envelope-icon {
+  padding: 10px;
+  background: var(--bank-secondary-container);
+  color: var(--bank-secondary);
+  border-radius: 12px;
+  font-size: 21px;
+}
+.period-card .eyebrow {
+  margin-bottom: 10px;
+}
+.period-card p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.section-link {
+  color: var(--bank-primary);
+  text-decoration: none;
+  font-size: 12px;
+}
+.tip {
+  background: var(--bank-primary-container);
+  padding: 22px;
+  border-radius: 16px;
+  display: flex;
+  gap: 16px;
+}
+.tip > span {
+  font-size: 28px;
+  color: var(--bank-primary);
+}
+.tip strong {
+  font-size: 12px;
+}
+.tip p {
+  font-size: 11px;
+  color: var(--bank-text-muted);
+  line-height: 1.6;
+}
+.tip a {
+  font-size: 11px;
+  color: var(--bank-primary);
+  text-decoration: none;
+}
+.accounts-summary {
+  margin-top: 24px;
+}
+.account-tile {
+  padding: 18px;
+  border: 1px solid var(--bank-border);
+  border-radius: 12px;
+}
+.account-tile .amount {
+  font-size: 24px;
+  display: block;
+}
+.account-tile small {
+  display: block;
+  margin-top: 10px;
+}
+@media (max-width: 1100px) {
+  .overview {
+    grid-template-columns: 1fr 1fr;
+  }
+  .balance-card {
+    grid-column: 1/-1;
+  }
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 650px) {
+  .overview {
+    gap: 12px;
+  }
+  .metric {
+    padding: 17px;
+  }
+  .metric strong {
+    font-size: 20px;
+  }
+  .metric p {
+    margin-top: 16px;
+  }
+  .total {
+    font-size: 34px;
+  }
+  .balance-card {
+    padding: 24px;
+  }
+  .metric small {
+    font-size: 10px;
+  }
+  .dashboard-columns {
+    gap: 18px;
+  }
+}
+
+.envelope-entry {
+  position: relative;
+  border-radius: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--bank-border);
+}
+.envelope-entry:last-child {
+  border-bottom: 0;
+}
+.envelope-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.envelope-row .amount {
+  white-space: nowrap;
+  font-size: 13px;
+}
+.envelope-progress {
+  position: relative;
+  height: 6px;
+  border-radius: 20px;
+  background: var(--bank-primary-container);
+  margin: 14px 0 0 54px;
+}
+.envelope-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--bank-primary);
+}
+.envelope-plan-caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 10px;
+  margin: 7px 0 0 54px;
+}
+
+.envelope-excess {
+  position: absolute;
+  inset: 0 0 0 auto;
+  background: var(--bank-secondary);
+  border-radius: 0 20px 20px 0;
+}
+.envelope-plan-limit {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--bank-text);
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px var(--bank-surface);
+}
+
+@media (max-width: 650px) {
+  .tip,
+  .accounts-summary,
+  .period-card {
+    display: none;
+  }
+}
+
+.envelope-open {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  border-radius: 8px;
+}
+.envelope-entry:has(.envelope-open:hover:not(:disabled)) {
+  background: var(--bank-hover);
+}

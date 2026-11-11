@@ -1,0 +1,19 @@
+<fieldset>
+  <legend>Modo de apariencia</legend>
+  <div class="segments">
+    @for (option of modes; track option.id) {
+      <label [class.selected]="mode() === option.id"
+        ><input
+          type="radio"
+          name="bank-theme-mode"
+          [checked]="mode() === option.id"
+          [value]="option.id"
+          (change)="selected.emit(option.id)"
+        /><app-icon [name]="option.icon" size="sm" /><span>{{ option.label }}</span>
+        @if (mode() === option.id) {
+          <app-icon class="check" name="check" size="xs" />
+        }
+      </label>
+    }
+  </div>
+</fieldset>

@@ -1,0 +1,28 @@
+@if (period(); as p) {
+  <p>{{ p.startDate }} — {{ p.endDate }}</p>
+  <p class="warning">
+    No podrás registrar movimientos en este periodo. Los saldos permanecen en cuentas y sobres.
+  </p>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  <div class="actions">
+    <button type="button" [disabled]="busy()" (click)="modal.requestClose()">Cancelar</button>
+    <button
+      type="button"
+      class="primary"
+      [disabled]="busy() || p.status !== 'OPEN' || !connection.online()"
+      (click)="confirm()"
+    >
+      <app-icon name="check" size="sm" />{{ busy() ? 'Cerrando…' : 'Confirmar cierre' }}
+    </button>
+  </div>
+} @else {
+  <p class="warning" role="status">
+    {{
+      busy()
+        ? 'Actualizando quincenas…'
+        : 'La quincena no está disponible. Vuelve a consultar el historial.'
+    }}
+  </p>
+}

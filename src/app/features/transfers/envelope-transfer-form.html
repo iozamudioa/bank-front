@@ -1,0 +1,72 @@
+@if (!embedded()) {
+  <h2>Transferir sobres entre cuentas</h2>
+}
+<form [formGroup]="form" (ngSubmit)="review()">
+  <fieldset [disabled]="c.busy() || c.reviewing()">
+    <label
+      >Sobre de origen<select formControlName="fromEnvelopeId">
+        <option value="">Selecciona</option>
+        @for (item of s.envelopes(); track item.id) {
+          <option [value]="item.id">{{ item.name }}</option>
+        }
+      </select></label
+    ><label
+      >Sobre de destino<select formControlName="toEnvelopeId">
+        <option value="">Selecciona</option>
+        @for (item of s.envelopes(); track item.id) {
+          <option [value]="item.id">{{ item.name }}</option>
+        }
+      </select></label
+    ><label
+      >Importe en MXN<input appMoneyInput formControlName="amount" />
+      @if (form.controls.amount.touched && form.controls.amount.invalid) {
+        <small class="error"
+          >Ingresa un importe {{ correctionMode() ? 'no negativo' : 'positivo' }} con máximo dos
+          decimales.</small
+        >
+      }</label
+    ><label>Descripción<input formControlName="description" /></label>
+    @if (!embedded()) {
+      <p class="muted">Quincena: {{ s.period()?.startDate }} — {{ s.period()?.endDate }}</p>
+    }
+    @if (!embedded()) {
+      <button
+        class="primary"
+        [disabled]="
+          form.invalid ||
+          !s.householdId() ||
+          !c.connection.online() ||
+          s.period()?.status !== 'OPEN'
+        "
+      >
+        Revisar operación
+      </button>
+    }
+  </fieldset>
+</form>
+@if (c.reviewing() && !embedded()) {
+  <section class="warning">
+    <h3>Confirmar mover entre sobres de la misma cuenta</h3>
+    <p>
+      Importe: {{ form.controls.amount.value | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }} MXN.
+      Verifica el origen y destino seleccionados.
+    </p>
+    @if (c.uncertain()) {
+      <p>Confirmación incierta: se reutilizarán exactamente la misma clave y los mismos datos.</p>
+    }
+    <button class="primary" [disabled]="c.busy() || !c.connection.online()" (click)="c.confirm()">
+      <app-icon name="check_circle" size="sm" />{{
+        c.busy()
+          ? 'Confirmando…'
+          : c.uncertain()
+            ? 'Reintentar misma operación'
+            : 'Confirmar movimiento'
+      }}</button
+    ><button [disabled]="c.busy() || c.uncertain()" (click)="c.cancel()">
+      <app-icon name="close" size="sm" />Cancelar
+    </button>
+  </section>
+}
+@if (c.message() && !embedded()) {
+  <p class="warning" role="status">{{ c.message() }}</p>
+}

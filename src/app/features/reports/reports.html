@@ -1,0 +1,27 @@
+<div class="page-heading">
+  <div>
+    <div class="eyebrow">CLARIDAD PARA DECIDIR</div>
+    <h1>Reportes</h1>
+    <p>La información correcta, sin contar movimientos dos veces.</p>
+  </div>
+</div>
+<section class="panel">
+  <h2>El resumen consolidado requiere soporte de la API</h2>
+  <p>
+    Por ahora puedes consultar movimientos por cuenta, sobre y quincena. BANK no dispone de un
+    endpoint de reportes ni de totales por periodo; una página del historial no representa toda tu
+    actividad.
+  </p>
+  <a routerLink="/movements" class="primary"
+    >Consultar actividad <app-icon name="arrow_forward" size="sm"
+  /></a>
+  <div class="actions">
+    <button disabled>Filtrar por fecha · no disponible</button
+    ><button disabled>Filtrar por tipo · no disponible</button
+    ><button disabled>Exportar reporte · no disponible</button>
+  </div>
+  <p class="muted">
+    Transferencias y reasignaciones son movimientos internos. No deben contabilizarse como gasto
+    familiar.
+  </p>
+</section>

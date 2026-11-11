@@ -1,0 +1,376 @@
+@use '@angular/material' as mat;
+@use './styles/login';
+@use './styles/icons';
+$bank-font-family: Inter, 'Segoe UI', sans-serif;
+@include mat.core();
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bank-background);
+  color: var(--bank-text);
+  font-family: $bank-font-family;
+  font-size: 14px;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--bank-text);
+  padding: 10px 12px;
+  min-height: 44px;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.primary {
+  background: var(--bank-primary);
+  color: var(--bank-on-primary);
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 19px;
+  font-weight: 650;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+.primary:hover {
+  box-shadow: inset 0 0 0 2px var(--bank-on-primary);
+}
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--bank-control-border);
+  border-radius: 10px;
+  background: var(--bank-surface);
+  color: var(--bank-text);
+  padding: 12px;
+  min-height: 44px;
+}
+label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 12px;
+  font-weight: 600;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--bank-focus);
+  outline-offset: 2px;
+}
+:focus-visible {
+  outline: 2px solid var(--bank-focus);
+  outline-offset: 3px;
+}
+h1 {
+  font-size: 30px;
+  letter-spacing: -1px;
+  margin: 6px 0 10px;
+}
+h2 {
+  font-size: 18px;
+  letter-spacing: -0.4px;
+  margin: 0 0 20px;
+}
+h3 {
+  font-size: 15px;
+}
+.muted,
+small {
+  color: var(--bank-text-muted);
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  font-weight: 700;
+  color: var(--bank-primary);
+}
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.page-heading p {
+  color: var(--bank-text-muted);
+  margin: 0;
+}
+.panel {
+  background: var(--bank-surface);
+  border: 1px solid var(--bank-border);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--bank-shadow);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+}
+.stack {
+  display: grid;
+  gap: 20px;
+}
+.error,
+.warning,
+.success {
+  padding: 16px;
+  border-radius: 10px;
+  line-height: 1.6;
+}
+.error {
+  background: var(--bank-danger-container);
+  color: var(--bank-danger);
+}
+.warning {
+  background: var(--bank-warning-container);
+  color: var(--bank-warning);
+}
+.success {
+  background: var(--bank-success-container);
+  color: var(--bank-success);
+}
+.empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--bank-text-muted);
+}
+.amount {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  font-weight: 750;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--bank-border);
+}
+.row:last-child {
+  border: 0;
+}
+.pill {
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--bank-primary-container);
+  color: var(--bank-primary);
+}
+form {
+  max-width: 680px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 18px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.section-title a {
+  color: var(--bank-primary);
+  font-size: 12px;
+  text-decoration: none;
+}
+details summary {
+  cursor: pointer;
+  padding: 12px 0;
+}
+progress {
+  width: 100%;
+  height: 6px;
+  accent-color: var(--bank-primary);
+}
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  a {
+    transition:
+      background 0.15s,
+      opacity 0.15s;
+  }
+}
+@media (max-width: 650px) {
+  h1 {
+    font-size: 25px;
+  }
+  .page-heading {
+    align-items: flex-start;
+  }
+  .panel {
+    padding: 20px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+html {
+  @include mat.theme(
+    (
+      color: mat.$azure-palette,
+      typography: (
+        plain-family: $bank-font-family,
+        brand-family: $bank-font-family,
+      ),
+      density: 0,
+    )
+  );
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--bank-primary),
+      filled-label-text-color: var(--bank-on-primary),
+      filled-container-shape: 10px,
+    )
+  );
+}
+
+.bank-modal {
+  --mat-dialog-container-color: var(--bank-surface);
+  --mat-dialog-container-shape: 20px;
+  --mat-dialog-container-max-width: 1050px;
+}
+.cdk-overlay-backdrop.cdk-overlay-dark-backdrop {
+  background: var(--bank-overlay);
+}
+.bank-modal .page-heading {
+  display: none;
+}
+.bank-modal .expense-layout {
+  gap: 16px;
+}
+.bank-modal .panel {
+  box-shadow: none;
+}
+.bank-modal form {
+  max-width: none;
+}
+.bank-modal input,
+.bank-modal select {
+  scroll-margin-block: 20px;
+}
+
+html {
+  @include mat.theme-overrides(
+    (
+      surface-tint: var(--bank-primary),
+      primary-fixed: var(--bank-primary-container),
+      primary-fixed-dim: var(--bank-primary-container),
+      on-primary-fixed: var(--bank-primary),
+      on-primary-fixed-variant: var(--bank-primary),
+      secondary-fixed: var(--bank-secondary-container),
+      secondary-fixed-dim: var(--bank-secondary-container),
+      on-secondary-fixed: var(--bank-secondary),
+      on-secondary-fixed-variant: var(--bank-secondary),
+      tertiary-fixed: var(--bank-secondary-container),
+      tertiary-fixed-dim: var(--bank-secondary-container),
+      on-tertiary-fixed: var(--bank-secondary),
+      on-tertiary-fixed-variant: var(--bank-secondary),
+      primary: var(--bank-primary),
+      on-primary: var(--bank-on-primary),
+      primary-container: var(--bank-primary-container),
+      on-primary-container: var(--bank-primary),
+      secondary: var(--bank-secondary),
+      on-secondary: var(--bank-on-secondary),
+      secondary-container: var(--bank-secondary-container),
+      on-secondary-container: var(--bank-secondary),
+      tertiary: var(--bank-accent),
+      on-tertiary: var(--bank-on-accent),
+      tertiary-container: var(--bank-secondary-container),
+      on-tertiary-container: var(--bank-secondary),
+      background: var(--bank-background),
+      on-background: var(--bank-text),
+      surface: var(--bank-surface),
+      on-surface: var(--bank-text),
+      surface-variant: var(--bank-surface-variant),
+      on-surface-variant: var(--bank-text-muted),
+      surface-dim: var(--bank-background),
+      surface-bright: var(--bank-surface),
+      surface-container: var(--bank-surface),
+      surface-container-lowest: var(--bank-background),
+      surface-container-low: var(--bank-surface),
+      surface-container-high: var(--bank-surface-variant),
+      surface-container-highest: var(--bank-surface-variant),
+      outline: var(--bank-control-border),
+      outline-variant: var(--bank-border),
+      error: var(--bank-danger),
+      on-error: var(--bank-surface),
+      error-container: var(--bank-danger-container),
+      on-error-container: var(--bank-danger),
+      inverse-surface: var(--bank-hero),
+      inverse-on-surface: var(--bank-on-hero),
+      inverse-primary: var(--bank-on-hero),
+    )
+  );
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--bank-surface),
+      subhead-color: var(--bank-text),
+      supporting-text-color: var(--bank-text-muted),
+    )
+  );
+  @include mat.tooltip-overrides(
+    (
+      container-color: var(--bank-hero),
+      supporting-text-color: var(--bank-on-hero),
+    )
+  );
+}
+a {
+  color: var(--bank-primary);
+}
+
+.header-actions {
+  @include mat.button-overrides(
+    (
+      filled-label-text-size: 13px,
+      filled-label-text-weight: 650,
+      filled-label-text-tracking: normal,
+    )
+  );
+}
+@media (max-width: 650px) {
+  .header-actions {
+    @include mat.button-overrides(
+      (
+        filled-label-text-size: 11px,
+      )
+    );
+  }
+}

@@ -1,0 +1,31 @@
+<fieldset>
+  <legend>Paleta de colores</legend>
+  <div class="palette-grid">
+    @for (palette of palettes(); track palette.id) {
+      <label class="palette-option" [class.selected]="selectedId() === palette.id">
+        <input
+          type="radio"
+          name="bank-palette"
+          [value]="palette.id"
+          [checked]="selectedId() === palette.id"
+          (change)="selected.emit(palette.id)"
+          [attr.aria-describedby]="'palette-description-' + palette.id"
+        />
+        <span class="option-heading"
+          ><span>{{ palette.name }}</span
+          ><app-icon
+            class="selection-mark"
+            [name]="selectedId() === palette.id ? 'check_circle' : 'radio_button_unchecked'"
+            [filled]="selectedId() === palette.id"
+        /></span>
+        <app-palette-preview [palette]="palette" [mode]="mode()" />
+        <span class="description" [id]="'palette-description-' + palette.id">{{
+          palette.description
+        }}</span>
+        <span class="selection-label">{{
+          selectedId() === palette.id ? 'Seleccionada' : 'Aplicar paleta'
+        }}</span>
+      </label>
+    }
+  </div>
+</fieldset>

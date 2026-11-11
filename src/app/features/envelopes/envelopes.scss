@@ -1,0 +1,56 @@
+.balance {
+  font-size: 30px;
+}
+.envelope-symbol {
+  font-size: 32px;
+  color: var(--bank-secondary);
+  padding-bottom: 18px;
+}
+.create {
+  margin-top: 24px;
+}
+a {
+  color: var(--bank-primary);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.envelope-card {
+  position: relative;
+}
+.envelope-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+}
+.envelope-open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+}
+.envelope-open:focus-visible {
+  outline: none;
+}
+.envelope-open:focus-visible::after {
+  outline: 2px solid var(--bank-focus);
+  outline-offset: 3px;
+}
+.envelope-card:has(.envelope-open:hover:not(:disabled)) {
+  border-color: var(--bank-primary);
+}
+.history-link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.plan-action {
+  position: relative;
+  z-index: 1;
+  color: var(--bank-primary);
+  font-size: 12px;
+}

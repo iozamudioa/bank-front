@@ -1,0 +1,80 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  max-height: min(90dvh, var(--bank-dialog-max-height, 90dvh));
+  color: var(--bank-text);
+  background: var(--bank-surface);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--bank-border);
+  flex-shrink: 0;
+}
+.modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.eyebrow {
+  margin: 0 0 8px;
+}
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+  scroll-padding-bottom: 32px;
+}
+.modal-notice {
+  margin: 0 24px 20px;
+  flex-shrink: 0;
+}
+@media (max-width: 650px) {
+  :host {
+    max-height: min(94dvh, var(--bank-dialog-max-height, 94dvh));
+  }
+  .modal-header {
+    padding: 16px;
+  }
+  .modal-body {
+    padding: 16px;
+  }
+}
+
+:host(.framed) {
+  height: min(850px, 90dvh, var(--bank-dialog-max-height, 90dvh));
+}
+:host(.framed) .modal-header {
+  border-bottom: 0;
+}
+:host(.framed) .modal-body {
+  padding: 0;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 650px) {
+  :host(.framed) {
+    height: min(94dvh, var(--bank-dialog-max-height, 94dvh));
+  }
+}
+
+:host(.compact-viewport) .modal-header {
+  padding-block: 8px;
+}
+:host(.compact-viewport) .modal-header .eyebrow {
+  display: none;
+}
+:host(.compact-viewport) .modal-header h2 {
+  font-size: 18px;
+}
+:host(.compact-viewport) .modal-notice {
+  max-height: 15%;
+  overflow-y: auto;
+  padding: 8px;
+  margin-bottom: 8px;
+}

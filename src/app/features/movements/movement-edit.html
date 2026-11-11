@@ -1,0 +1,232 @@
+<section class="edit-detail">
+  @if (loading()) {
+    <p class="muted" role="status">Consultando movimiento…</p>
+  }
+  @if (c.message()) {
+    <p class="error" role="alert">{{ c.message() }}</p>
+  }
+  @if (original(); as movement) {
+    <p class="muted">
+      Movimiento original: {{ movement.occurredAt | date: 'dd/MM/yyyy HH:mm' : '-0600' }} ·
+      {{ movement.amount | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}
+    </p>
+    <p class="muted">
+      La corrección conserva el historial y registra los cambios en una quincena abierta.
+    </p>
+    <fieldset [disabled]="locked()">
+      @if (!openPeriods().length && !s.loading()) {
+        <p class="warning">
+          Abre una quincena para registrar la corrección. El movimiento original puede pertenecer a
+          una cerrada.
+        </p>
+      }
+      <div [formGroup]="meta">
+        <label
+          >Quincena de la corrección<select formControlName="periodId">
+            <option value="">Selecciona una quincena abierta</option>
+            @for (period of openPeriods(); track period.id) {
+              @if (period.status === 'OPEN') {
+                <option [value]="period.id">{{ period.startDate }} — {{ period.endDate }}</option>
+              }
+            }
+          </select></label
+        >
+        <label
+          >Motivo de la corrección<input formControlName="reason" required />
+          @if (meta.controls.reason.touched && meta.controls.reason.invalid) {
+            <small class="error">Indica el motivo de la corrección.</small>
+          }
+        </label>
+      </div>
+      @if (seed(); as value) {
+        <h3>
+          {{
+            expense()
+              ? expenseForm.controls.origin.value === 'account'
+                ? labels.ACCOUNT_EXPENSE
+                : labels.EXPENSE
+              : labels[value.type]
+          }}
+        </h3>
+        @switch (value.type) {
+          @case ('INCOME') {
+            <app-income-form
+              [embedded]="true"
+              [correctionMode]="true"
+              [reviewAction]="requestReview"
+            />
+          }
+          @case ('ALLOCATE') {
+            <app-allocation-form
+              [embedded]="true"
+              [correctionMode]="true"
+              [prefillPlan]="false"
+              [reviewAction]="requestReview"
+            />
+          }
+          @case ('RELEASE') {
+            <app-release-form
+              [embedded]="true"
+              [correctionMode]="true"
+              [reviewAction]="requestReview"
+            />
+          }
+          @case ('TRANSFER') {
+            <app-transfer-form
+              [embedded]="true"
+              [correctionMode]="true"
+              [reviewAction]="requestReview"
+            />
+          }
+          @case ('REALLOCATE') {
+            <app-reallocation-form
+              [embedded]="true"
+              [correctionMode]="true"
+              [reviewAction]="requestReview"
+            />
+          }
+          @case ('ENVELOPE_TRANSFER') {
+            <app-envelope-transfer-form
+              [embedded]="true"
+              [correctionMode]="true"
+              [reviewAction]="requestReview"
+            />
+          }
+        }
+        @if (expense()) {
+          <form [formGroup]="expenseForm" (ngSubmit)="review()">
+            <label
+              >Origen del gasto<select formControlName="origin">
+                <option value="envelope">Desde sobre</option>
+                <option value="account">Saldo libre de una cuenta</option>
+              </select></label
+            >
+            @if (expenseForm.controls.origin.value === 'account') {
+              <label
+                >Cuenta de pago<select formControlName="accountId">
+                  <option value="">Selecciona una cuenta</option>
+                  @for (account of s.accounts(); track account.id) {
+                    <option [value]="account.id">{{ account.name }}</option>
+                  }
+                </select></label
+              >
+              <p class="muted">Solo se usa saldo libre; las reservas de sobres se conservan.</p>
+            } @else {
+              <label
+                >Sobre principal<select formControlName="targetEnvelopeId">
+                  <option value="">Selecciona un sobre</option>
+                  @for (envelope of s.envelopes(); track envelope.id) {
+                    <option [value]="envelope.id">{{ envelope.name }}</option>
+                  }
+                </select></label
+              >
+            }
+            <label>Importe en MXN<input appMoneyInput formControlName="amount" /></label>
+            <label>Descripción<input formControlName="description" /></label>
+          </form>
+          @if (zeroExpense()) {
+            <p class="muted">
+              El importe cero devuelve los fondos del gasto original. No se aplican aportaciones
+              nuevas.
+            </p>
+          }
+          @if (expenseForm.controls.origin.value === 'envelope' && !zeroExpense()) {
+            <h3>Aportaciones del gasto</h3>
+            <p class="muted">
+              Se conservan las aportaciones originales. Si cambias el importe, ajusta su
+              distribución para cubrirlo exactamente.
+            </p>
+            @for (row of funding.controls; track row; let index = $index) {
+              <div class="funding-row" [formGroup]="row">
+                <label
+                  >Sobre<select formControlName="envelopeId">
+                    <option value="">Selecciona</option>
+                    @for (envelope of s.envelopes(); track envelope.id) {
+                      <option [value]="envelope.id">{{ envelope.name }}</option>
+                    }
+                  </select></label
+                >
+                <label>Aportación<input appMoneyInput formControlName="amount" /></label>
+                <button type="button" (click)="removeFunding(index)" aria-label="Quitar aportación">
+                  <app-icon name="close" size="sm" />
+                </button>
+              </div>
+            }
+            <button type="button" (click)="addFunding()">
+              <app-icon name="add" size="sm" />Agregar aportación
+            </button>
+          }
+        }
+      }
+      @if (activeForm()?.c?.message()) {
+        <p class="warning" role="status">{{ activeForm()?.c?.message() }}</p>
+      }
+    </fieldset>
+  } @else if (!loading()) {
+    <button type="button" (click)="load()">Consultar de nuevo</button>
+  }
+</section>
+<footer class="edit-footer">
+  @if (c.reviewing()) {
+    <div class="net-effects" aria-live="polite">
+      <strong>Resultado neto de la corrección</strong>
+      @for (effect of effects(); track effect.key) {
+        <div class="effect-row">
+          <div>
+            <strong>{{ effect.name }}</strong><small>{{ effect.scope }}</small>
+          </div>
+          <span>Antes {{ effect.before | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</span>
+          <strong
+            >{{ effect.change < 0 ? '−' : '+'
+            }}{{ absolute(effect.change) | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong
+          >
+          <span
+            >Total
+            <strong>{{ effect.after | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong></span
+          >
+        </div>
+      } @empty {
+        <p class="muted">La corrección no cambia los saldos.</p>
+      }
+      <p class="muted">La API vuelve a validar los saldos al confirmar.</p>
+    </div>
+    @if (c.uncertain()) {
+      <p class="warning" role="alert">
+        Confirmación pendiente. Reintenta con la misma operación; los datos y la clave se conservan.
+      </p>
+    }
+    @if (c.message()) {
+      <p class="error" role="alert">{{ c.message() }}</p>
+    }
+    <div class="edit-actions">
+      <button type="button" [disabled]="c.busy() || c.uncertain()" (click)="cancel()">
+        Volver a editar
+      </button>
+      <button
+        type="button"
+        class="primary"
+        [disabled]="c.busy() || !c.connection.online()"
+        (click)="c.confirm()"
+      >
+        <app-icon name="check_circle" size="sm" />{{
+          c.busy()
+            ? 'Confirmando…'
+            : c.uncertain()
+              ? 'Reintentar misma operación'
+              : 'Aceptar corrección'
+        }}
+      </button>
+    </div>
+  } @else {
+    <button
+      type="button"
+      class="primary"
+      [disabled]="locked() || !seed() || !openPeriods().length || !c.connection.online()"
+      (click)="review()"
+    >
+      <app-icon name="receipt_long" size="sm" />{{
+        previewBusy() ? 'Consultando…' : 'Revisar corrección'
+      }}
+    </button>
+  }
+</footer>

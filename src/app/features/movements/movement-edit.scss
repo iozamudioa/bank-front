@@ -1,0 +1,112 @@
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.edit-detail {
+  padding: 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.funding-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+.funding-row button {
+  margin-bottom: 18px;
+}
+.edit-footer {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+  gap: 10px;
+  padding: 16px 24px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--bank-border);
+}
+.edit-footer > .primary {
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+.net-effects {
+  min-height: 0;
+  max-height: min(38dvh, calc(var(--bank-dialog-viewport-height, 100dvh) * 0.38));
+  overflow-y: auto;
+}
+.effect-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 8px 18px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bank-border);
+  font-size: 12px;
+}
+.effect-row small {
+  display: block;
+  color: var(--bank-text-muted);
+  margin-top: 4px;
+}
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.edit-footer > .warning,
+.edit-footer > .error {
+  margin: 0;
+  max-height: 10dvh;
+  overflow-y: auto;
+  padding: 8px;
+  font-size: 12px;
+  flex-shrink: 1;
+}
+@media (max-width: 650px) {
+  .edit-detail,
+  .edit-footer {
+    padding-inline: 16px;
+  }
+  .effect-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .effect-row > div {
+    grid-row: span 3;
+  }
+  .effect-row > span,
+  .effect-row > strong {
+    text-align: right;
+  }
+  .funding-row {
+    grid-template-columns: 1fr auto;
+  }
+  .funding-row label:first-child {
+    grid-column: 1 / -1;
+  }
+  .edit-actions button {
+    padding-inline: 12px;
+  }
+}
+:host-context(.compact-viewport) .edit-detail {
+  padding-block: 8px;
+}
+:host-context(.compact-viewport) .edit-footer {
+  padding-block: 8px;
+}

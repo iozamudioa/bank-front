@@ -1,0 +1,35 @@
+<mat-form-field appearance="outline" class="range-field">
+  <mat-label>Fechas de la quincena</mat-label>
+  <mat-date-range-input [rangePicker]="calendar" [formGroup]="dates" [disabled]="disabled()">
+    <input
+      matStartDate
+      formControlName="start"
+      placeholder="Inicio"
+      aria-label="Fecha de inicio"
+      readonly
+      (click)="calendar.open()"
+      (blur)="touch()"
+    />
+    <input
+      matEndDate
+      formControlName="end"
+      placeholder="Fin"
+      aria-label="Fecha de fin"
+      readonly
+      (click)="calendar.open()"
+      (blur)="touch()"
+    />
+  </mat-date-range-input>
+  <mat-datepicker-toggle
+    matIconSuffix
+    [for]="calendar"
+    [disabled]="disabled()"
+    aria-label="Elegir rango de fechas"
+    ><app-icon matDatepickerToggleIcon name="calendar_month"
+  /></mat-datepicker-toggle>
+  <mat-hint>Elige el día de inicio y después el día de fin en el mismo calendario.</mat-hint>
+  <mat-error
+    >Selecciona un rango completo con la fecha de fin posterior o igual al inicio.</mat-error
+  >
+  <mat-date-range-picker #calendar [disabled]="disabled()" (closed)="touch()" />
+</mat-form-field>

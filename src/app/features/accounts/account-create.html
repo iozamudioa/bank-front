@@ -1,0 +1,22 @@
+<section>
+  <form [formGroup]="form" (ngSubmit)="create()">
+    <div class="form-grid">
+      <label>Nombre<input formControlName="name" required maxlength="120" /></label
+      ><label
+        >Medio<select formControlName="type">
+          <option value="PHYSICAL">Físico</option>
+          <option value="DIGITAL">Digital</option>
+        </select></label
+      >
+    </div>
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    <button class="primary" [disabled]="form.invalid || busy() || !s.householdId()">
+      <app-icon name="add" size="sm" />Crear cuenta
+    </button>
+  </form>
+  <p class="muted">
+    El saldo se registra mediante un movimiento de saldo inicial. No se edita desde la cuenta.
+  </p>
+</section>

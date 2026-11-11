@@ -1,0 +1,24 @@
+<section class="panel appearance" aria-labelledby="appearance-title">
+  <div class="eyebrow">EL ESTILO DE TU HOGAR</div>
+  <h2 id="appearance-title">Apariencia</h2>
+  <p class="intro">
+    Elige una personalidad para BANK y combínala con el modo que prefieras. Los cambios se aplican
+    al instante.
+  </p>
+  <app-palette-selector
+    [palettes]="theme.palettes"
+    [selectedId]="theme.paletteId()"
+    [mode]="theme.effectiveMode()"
+    (selected)="theme.setPalette($event)"
+  />
+  <div class="mode">
+    <app-theme-mode-selector [mode]="theme.effectiveMode()" (selected)="theme.setMode($event)" />
+    <p class="hint">
+      La app toma el tema del dispositivo al abrirse y cuando cambia. Puedes elegir Claro u Oscuro
+      durante la sesión; la paleta se conserva.
+    </p>
+  </div>
+  <p class="current" role="status" aria-live="polite">
+    {{ theme.palette().name }} · {{ theme.modeLabel() }}
+  </p>
+</section>

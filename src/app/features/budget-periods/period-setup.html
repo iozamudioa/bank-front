@@ -1,0 +1,196 @@
+<header class="setup-header">
+  <app-dialog-tabs
+    [items]="steps"
+    [selected]="step()"
+    [disabled]="blocked() || !ready() || creatingEnvelope()"
+    idPrefix="period-setup"
+    label="Pasos para cargar y distribuir saldos"
+    (selectedChange)="go($event)"
+  />
+</header>
+<section
+  class="setup-detail"
+  role="tabpanel"
+  [id]="'period-setup-panel-' + step()"
+  [attr.aria-labelledby]="'period-setup-tab-' + step()"
+>
+  @if (s.loading()) {
+    <p class="muted" role="status">Actualizando saldos…</p>
+  } @else if (!ready()) {
+    <p class="error" role="alert">
+      {{
+        s.error() ||
+          'Esta quincena ya no está abierta o no está disponible. No se pueden registrar nuevas operaciones.'
+      }}
+    </p>
+    <button type="button" [disabled]="blocked()" (click)="s.refresh()">Consultar de nuevo</button>
+  }
+  @if (period(); as p) {
+    <p class="muted">Quincena: {{ p.startDate }} — {{ p.endDate }}</p>
+  }
+  @switch (step()) {
+    @case ('income') {
+      <h3>Registrar ingreso</h3>
+      <p class="muted">
+        Puedes registrar varios ingresos. Si ya están registrados, continúa a las transferencias.
+      </p>
+      <app-income-form [embedded]="true" [periodId]="periodId()" />
+    }
+    @case ('transfer') {
+      <h3>Transferir entre cuentas</h3>
+      <p class="muted">
+        Lleva el dinero a la cuenta de cada sobre antes de apartarlo. Puedes hacer varias
+        transferencias u omitir este paso.
+      </p>
+      @for (account of s.dashboard()?.accounts ?? []; track account.id) {
+        <div class="balance-row">
+          <span>{{ account.name }} · libre</span
+          ><strong>{{ account.free | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+        </div>
+      }
+      <app-transfer-form [embedded]="true" [periodId]="periodId()" />
+    }
+    @case ('allocate') {
+      @if (creatingEnvelope()) {
+        <h3>Nuevo sobre y su plan</h3>
+        <p class="muted">
+          Define lo planeado para esta quincena. Al guardar podrás apartar dinero para el nuevo
+          sobre.
+        </p>
+        <app-envelope-create [planPeriodId]="periodId()" (saved)="envelopeSaved($event)" />
+      } @else {
+        @if (current(); as envelope) {
+          <p class="eyebrow">Sobre {{ currentIndex() }} de {{ envelopes().length }}</p>
+          <h3>{{ envelope.name }}</h3>
+          <p class="muted">{{ accountName(envelope.accountId) }}</p>
+          <div class="envelope-plan">
+            <div>
+              <small>Planeado</small
+              ><strong>{{
+                planned(envelope.id) === null
+                  ? 'Sin plan'
+                  : (planned(envelope.id) | currency: 'MXN' : 'symbol-narrow' : '1.2-2')
+              }}</strong>
+            </div>
+            <div>
+              <small>Disponible en el sobre</small
+              ><strong>{{ envelope.balance | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</strong>
+            </div>
+            <div>
+              <small>Falta para el plan</small
+              ><strong>{{
+                remaining(envelope.id) | currency: 'MXN' : 'symbol-narrow' : '1.2-2'
+              }}</strong>
+            </div>
+          </div>
+          <p class="muted">
+            El importe se precarga con lo planeado para esta quincena. Puedes ajustarlo o continuar
+            sin apartar.
+          </p>
+          @for (id of [envelope.id]; track id) {
+            <app-allocation-form [embedded]="true" [fixedEnvelopeId]="id" [periodId]="periodId()" />
+          }
+        } @else {
+          <h3>Apartar dinero en tus sobres</h3>
+          <p class="muted">
+            {{
+              envelopes().length
+                ? 'Ya revisaste todos los sobres. Puedes volver a revisarlos o agregar uno nuevo.'
+                : 'No hay sobres activos con una cuenta activa. Agrega uno para comenzar.'
+            }}
+          </p>
+        }
+      }
+    }
+    @case ('summary') {
+      <h3>Revisión de tus sobres</h3>
+      <p class="muted">Estos son los saldos actuales. Revisa los pendientes antes de terminar.</p>
+      @for (envelope of envelopes(); track envelope.id) {
+        <div class="summary-row">
+          <div>
+            <strong>{{ envelope.name }}</strong><small>{{
+              decisions()[envelope.id] === 'allocated'
+                ? 'Apartado registrado'
+                : decisions()[envelope.id] === 'skipped'
+                  ? 'Omitido'
+                  : 'Sin revisar'
+            }}</small>
+          </div>
+          <div>
+            <strong>{{
+              envelope.balance | currency: 'MXN' : 'symbol-narrow' : '1.2-2'
+            }}</strong><small>{{
+              planned(envelope.id) === null
+                ? 'Sin plan para esta quincena'
+                : 'Planeado: ' +
+                  (planned(envelope.id) | currency: 'MXN' : 'symbol-narrow' : '1.2-2')
+            }}</small>
+            @if (planned(envelope.id) !== null && remaining(envelope.id) > 0) {
+              <small class="pending"
+                >Faltan
+                {{ remaining(envelope.id) | currency: 'MXN' : 'symbol-narrow' : '1.2-2' }}</small
+              >
+            }
+          </div>
+          <button type="button" [disabled]="!ready() || blocked()" (click)="revisit(envelope.id)">
+            Revisar
+          </button>
+        </div>
+      } @empty {
+        <p class="muted">Aún no hay sobres activos.</p>
+      }
+    }
+  }
+</section>
+<footer class="setup-footer">
+  @if (activeForm(); as form) {
+    <app-movement-footer
+      [controller]="form"
+      [operation]="operation()"
+      [label]="operationLabel()"
+      [enabled]="ready()"
+    />
+  }
+  <div class="setup-actions">
+    @if (creatingEnvelope()) {
+      <button type="button" [disabled]="blocked()" (click)="cancelNewEnvelope()">
+        Volver a los sobres
+      </button>
+    } @else {
+      @switch (step()) {
+        @case ('income') {
+          <button type="button" [disabled]="!ready() || blocked()" (click)="go('transfer')">
+            Continuar a transferencias <app-icon name="arrow_forward" size="sm" />
+          </button>
+        }
+        @case ('transfer') {
+          <button type="button" [disabled]="!ready() || blocked()" (click)="go('allocate')">
+            Continuar a sobres <app-icon name="arrow_forward" size="sm" />
+          </button>
+        }
+        @case ('allocate') {
+          <button type="button" [disabled]="!ready() || blocked()" (click)="newEnvelope()">
+            <app-icon name="add" size="sm" />Nuevo sobre
+          </button>
+          @if (current()) {
+            <button type="button" [disabled]="!ready() || blocked()" (click)="skipEnvelope()">
+              Continuar sin apartar <app-icon name="arrow_forward" size="sm" />
+            </button>
+          } @else {
+            <button type="button" [disabled]="!ready() || blocked()" (click)="go('summary')">
+              Revisar sobres <app-icon name="arrow_forward" size="sm" />
+            </button>
+          }
+        }
+        @case ('summary') {
+          <button type="button" [disabled]="!ready() || blocked()" (click)="newEnvelope()">
+            <app-icon name="add" size="sm" />Nuevo sobre
+          </button>
+          <button type="button" class="primary" [disabled]="blocked()" (click)="finish()">
+            <app-icon name="check" size="sm" />Terminar
+          </button>
+        }
+      }
+    }
+  </div>
+</footer>

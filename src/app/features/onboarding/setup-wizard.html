@@ -1,0 +1,53 @@
+@if (!s.householdId()) {
+  <app-onboarding />
+} @else {
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">PASO A PASO, A TU RITMO</div>
+      <h1>Preparemos tu hogar</h1>
+      <p>Configura tu espacio sin crear dinero ni aportaciones automáticamente.</p>
+    </div>
+  </div>
+  <nav class="wizard-steps" aria-label="Pasos de configuración">
+    @for (name of steps; track name; let i = $index) {
+      <button
+        [disabled]="safety.locked()"
+        [class.selected]="step() === i"
+        [attr.aria-current]="step() === i ? 'step' : null"
+        (click)="step.set(i)"
+      >
+        {{ i + 1 }}. {{ name }}
+      </button>
+    }
+  </nav>
+  <div [hidden]="step() !== 0"><app-members /></div>
+  <div [hidden]="step() !== 1"><app-accounts /></div>
+  <div [hidden]="step() !== 2"><app-income-sources /></div>
+  <div [hidden]="step() !== 3"><app-envelopes /></div>
+  <div [hidden]="step() !== 4"><app-periods /></div>
+  <div class="panel" [hidden]="step() !== 5"><app-opening-form /></div>
+  <div class="actions">
+    <button [disabled]="step() === 0 || safety.locked()" (click)="previous()">
+      <app-icon name="arrow_back" size="sm" /> Anterior
+    </button>
+    @if (step() < steps.length - 1) {
+      <button class="primary" [disabled]="safety.locked()" (click)="next()">
+        Siguiente <app-icon name="arrow_forward" size="sm" />
+      </button>
+    } @else {
+      <a
+        [routerLink]="hasOpenPeriod() ? '/dashboard' : null"
+        [attr.aria-disabled]="!hasOpenPeriod()"
+        class="primary"
+        >Comenzar a usar BANK <app-icon name="arrow_forward" size="sm"
+      /></a>
+    }
+  </div>
+  @if (!hasOpenPeriod()) {
+    <p class="warning">Abre una quincena antes de comenzar a usar BANK.</p>
+  }
+  <p class="muted">
+    Puedes regresar sin perder los campos durante esta sesión. Los datos guardados se recuperan de
+    la API.
+  </p>
+}

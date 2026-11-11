@@ -1,0 +1,34 @@
+form {
+  max-width: none;
+}
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.confirmation {
+  margin-top: 20px;
+}
+.confirmation h3 {
+  margin-top: 0;
+}
+.confirmation ul {
+  padding-left: 20px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.question {
+  font-weight: 700;
+}
+.confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}

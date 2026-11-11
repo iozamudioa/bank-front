@@ -1,0 +1,30 @@
+<section>
+  <form [formGroup]="form" (ngSubmit)="create()">
+    <div class="form-grid">
+      <label>Nombre<input formControlName="name" required /></label
+      ><label
+        >Cuenta sugerida<select formControlName="accountId" required>
+          <option value="">Selecciona una cuenta</option>
+          @for (a of s.accounts(); track a.id) {
+            <option [value]="a.id">{{ a.name }}</option>
+          }
+        </select></label
+      ><label
+        >Tipo<select formControlName="type">
+          <option value="PAYROLL">Nómina</option>
+          <option value="TRANSFER">Transferencia</option>
+          <option value="TANDA">Tanda</option>
+          <option value="OTHER">Otro</option>
+        </select></label
+      ><label
+        >Importe esperado · opcional<input formControlName="expectedAmount" inputmode="decimal"
+      /></label>
+    </div>
+    <button class="primary" [disabled]="form.invalid || busy() || !s.householdId()">
+      <app-icon name="add" size="sm" />Crear fuente
+    </button>
+  </form>
+</section>
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}

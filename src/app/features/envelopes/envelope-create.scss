@@ -1,0 +1,32 @@
+form {
+  max-width: none;
+}
+p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.form-grid {
+  align-items: start;
+}
+.form-grid label {
+  min-width: 0;
+  align-content: start;
+}
+.form-grid input,
+.form-grid select {
+  height: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+.form-grid small {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+}

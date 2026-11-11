@@ -1,0 +1,52 @@
+<div class="tab-navigation">
+  <button
+    type="button"
+    class="tab-scroll"
+    aria-label="Ver pestañas anteriores"
+    [attr.aria-controls]="idPrefix() + '-tabs'"
+    [hidden]="!canScrollBack() && !canScrollForward()"
+    [disabled]="!canScrollBack()"
+    (click)="scroll(-1)"
+  >
+    <app-icon name="chevron_left" />
+  </button>
+  <div
+    #tabsViewport
+    [id]="idPrefix() + '-tabs'"
+    (scroll)="updateScroll()"
+    class="movement-tabs"
+    role="tablist"
+    [attr.aria-label]="label()"
+    aria-orientation="horizontal"
+  >
+    @for (item of items(); track item.id; let i = $index) {
+      <button
+        #actionTab
+        type="button"
+        role="tab"
+        class="movement-tab"
+        [id]="idPrefix() + '-tab-' + item.id"
+        [attr.aria-controls]="idPrefix() + '-panel-' + item.id"
+        [attr.aria-selected]="selected() === item.id"
+        [tabIndex]="selected() === item.id ? 0 : -1"
+        [class.selected]="selected() === item.id"
+        [disabled]="disabled()"
+        (click)="select(item.id)"
+        (keydown)="onKey($event, i)"
+      >
+        <app-icon [name]="item.icon" size="sm" [filled]="selected() === item.id" />{{ item.label }}
+      </button>
+    }
+  </div>
+  <button
+    type="button"
+    class="tab-scroll"
+    aria-label="Ver más pestañas"
+    [attr.aria-controls]="idPrefix() + '-tabs'"
+    [hidden]="!canScrollBack() && !canScrollForward()"
+    [disabled]="!canScrollForward()"
+    (click)="scroll(1)"
+  >
+    <app-icon name="chevron_right" />
+  </button>
+</div>

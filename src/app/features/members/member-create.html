@@ -1,0 +1,24 @@
+<section>
+  <p class="muted">
+    El usuario debe tener credenciales HTTP Basic ya configuradas en el backend. Agregarlo aquí crea
+    la membresía; no crea una contraseña ni envía invitaciones.
+  </p>
+  <form [formGroup]="form" (ngSubmit)="create()">
+    <div class="form-grid">
+      <label>Usuario existente<input formControlName="username" required /></label
+      ><label>Nombre visible<input formControlName="displayName" required /></label
+      ><label
+        >Rol<select formControlName="role">
+          <option value="EDITOR">Puede registrar movimientos</option>
+          <option value="VIEWER">Solo consulta</option>
+        </select></label
+      >
+    </div>
+    <button class="primary" [disabled]="form.invalid || busy() || !s.householdId()">
+      <app-icon name="add" size="sm" />Agregar integrante
+    </button>
+  </form>
+</section>
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
