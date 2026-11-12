@@ -38,6 +38,9 @@ Generado desde openapi.json. Autenticación global: HTTP Basic.
 - `POST /api/v1/households/{householdId}/movements/{id}/corrections` → `correctMovement`. Corregir movimiento de forma atomica Respuestas: 200, 400, 401, 403, 404, 409, 500, 503.
 - `POST /api/v1/households/{householdId}/movements/{id}/corrections/preview` → `previewMovementCorrection`. Previsualizar correccion de movimiento Respuestas: 200, 400, 401, 403, 404, 409, 500, 503.
 - `POST /api/v1/households/{householdId}/movements/{id}/reverse` → `reverseMovement`. Revertir un movimiento Respuestas: 200, 400, 401, 403, 404, 409, 500, 503.
+- `POST /api/v1/households/{householdId}/push-subscriptions` → `registerPushSubscription`. Registrar dispositivo Web Push Respuestas: 200.
+- `POST /api/v1/households/{householdId}/push-subscriptions/test-notification` → `sendTestPushNotification`. Enviar notificación Web Push de prueba Respuestas: 200.
+- `GET /api/v1/households/{householdId}/push-subscriptions/vapid-public-key` → `getPushVapidPublicKey`. Obtener clave pública VAPID Respuestas: 200.
 - `GET /api/v1/me` → `getCurrentUser`. Consultar identidad autenticada Respuestas: 200, 401, 500.
 
 ## Pantallas y servicios
@@ -60,6 +63,7 @@ Generado desde openapi.json. Autenticación global: HTTP Basic.
 | Transferencias                    | transferAccounts, reallocateEnvelopes, transferEnvelopes                                                      |
 | Saldo inicial                     | registerOpeningBalance                                                                                        |
 | Historial, corrección y reversión | listMovements, getMovement, previewMovementCorrection, correctMovement, reverseMovement                       |
+| Notificaciones                    | getPushVapidPublicKey, registerPushSubscription, sendTestPushNotification                                     |
 | Reportes                          | Sin endpoint de reportes: estado de capacidad no disponible                                                   |
 
 getBudgetPeriod comprueba el estado vigente antes de guardar un plan y permite revisar un conflicto. getMovement consulta el detalle vigente antes de editar y evita corregir una fila obsoleta; getHousehold sigue generado para consultas específicas.

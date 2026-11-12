@@ -268,6 +268,17 @@ export type OpeningBalanceRequest = {
   description?: string | null;
   periodId?: string | null;
 };
+export type PushSubscriptionResponse = {
+  active?: boolean;
+  createdAt?: string;
+  deviceName?: string;
+  householdId?: string;
+  id?: string;
+  installationId?: string;
+  memberId?: string;
+  subscriberKey?: string;
+  updatedAt?: string;
+};
 export type ReallocationReplacementRequest = {
   amount: number;
   description?: string;
@@ -282,6 +293,13 @@ export type ReallocationRequest = {
   periodId: string;
   toEnvelopeId: string;
 };
+export type RegisterPushSubscriptionRequest = {
+  auth: string;
+  deviceName: string;
+  endpoint: string;
+  installationId: string;
+  p256dh: string;
+};
 export type ReleaseReplacementRequest = {
   amount: number;
   description?: string;
@@ -290,6 +308,11 @@ export type ReleaseReplacementRequest = {
 };
 export type ReverseRequest = { periodId: string; reason: string };
 export type SaveBudgetRequest = { allocations: BudgetLineRequest[]; expectedIncome: number };
+export type SendHouseholdNotificationRequest = {
+  message: string;
+  metadata?: Record<string, {}>;
+  title: string;
+};
 export type TransferReplacementRequest = {
   amount: number;
   description?: string;
@@ -307,3 +330,4 @@ export type TransferRequest = {
 export type UpsertPeriodBudgetLineRequest = { amount: number };
 export type UpsertTemplateBudgetLineRequest = { amount: number };
 export type UserResponse = { username: string };
+export type VapidPublicKeyResponse = { publicKey?: string };

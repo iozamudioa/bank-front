@@ -15,9 +15,11 @@ function type(s = {}) {
             : s.type === 'array'
               ? `(${type(s.items)})[]`
               : s.type === 'object'
-                ? `{ ${Object.entries(s.properties || {})
-                    .map(([k, v]) => `${k}${s.required?.includes(k) ? '' : '?'}: ${type(v)}`)
-                    .join('; ')} }`
+                ? s.additionalProperties
+                  ? `Record<string, ${s.additionalProperties === true ? 'unknown' : type(s.additionalProperties)}>`
+                  : `{ ${Object.entries(s.properties || {})
+                      .map(([k, v]) => `${k}${s.required?.includes(k) ? '' : '?'}: ${type(v)}`)
+                      .join('; ')} }`
                 : { integer: 'number', number: 'number', boolean: 'boolean', string: 'string' }[
                     s.type
                   ] || 'unknown');
@@ -41,7 +43,14 @@ let mapping = [
 for (const [path, ops] of Object.entries(spec.paths))
   for (const [verb, o] of Object.entries(ops)) {
     const params = o.parameters || [];
-    const schema = o.responses['200']?.content?.['application/json']?.schema;
+    const success = Object.entries(o.responses)
+      .filter(([code]) => /^2\d\d$/.test(code))
+      .sort(([a], [b]) => a.localeCompare(b));
+    const schemas = success.map(
+      ([, response]) =>
+        response.content?.['application/json']?.schema ?? response.content?.['*/*']?.schema,
+    );
+    const schema = schemas.find(Boolean);
     const body = o.requestBody?.content?.['application/json']?.schema;
     const args = params.filter((p) => p.in === 'path').map((p) => `${p.name}: string`);
     if (body) args.push(`body: ${ref(body)}`);
@@ -54,7 +63,7 @@ for (const [path, ops] of Object.entries(spec.paths))
         '`'
       : 'this.base + `' + url + '`';
     methods.push(
-      `${o.operationId}(${args.join(', ')}) { return this.http.request<${schema ? (ref(schema) ? '' + ref(schema) : schema.type === 'array' ? '' + ref(schema.items) + '[]' : type(schema)) : 'unknown'}>('${verb.toUpperCase()}', ${target}, {timeout:20000,${body ? 'body,' : ''}${params.some((p) => p.in === 'header') ? "headers: {'Idempotency-Key': key}," : ''}${params.some((p) => p.in === 'query') ? 'params: query,' : ''}}); }`,
+      `${o.operationId}(${args.join(', ')}) { return this.request<${schema ? (ref(schema) ? '' + ref(schema) : schema.type === 'array' ? '' + ref(schema.items) + '[]' : type(schema)) : 'void'}>('${verb.toUpperCase()}', ${target}, {${body ? 'body,' : ''}${params.some((p) => p.in === 'header') ? "headers: {'Idempotency-Key': key}," : ''}${params.some((p) => p.in === 'query') ? 'params: query,' : ''}}); }`,
     );
     mapping.push(
       `- \`${verb.toUpperCase()} ${path}\` → \`${o.operationId}\`. ${o.summary || ''} Respuestas: ${Object.keys(o.responses).join(', ')}.`,
@@ -62,7 +71,7 @@ for (const [path, ops] of Object.entries(spec.paths))
   }
 writeFileSync(
   'src/app/core/api/generated/bank-api.ts',
-  `// Generated. Do not edit.\nimport { Injectable, inject } from '@angular/core';\nimport { HttpClient } from '@angular/common/http';\nimport { ${Object.keys(spec.components.schemas).join(', ')} } from './models';\nimport { environment } from '../../../../environments/environment';\n@Injectable({providedIn:'root'})\nexport class BankApi { private readonly http=inject(HttpClient); private readonly base=environment.apiBase; private household(id:string){return this.base+'/api/v1/households/'+encodeURIComponent(id);}
+  `// Generated. Do not edit.\nimport { Injectable, inject } from '@angular/core';\nimport { HttpClient } from '@angular/common/http';\nimport { ${Object.keys(spec.components.schemas).join(', ')} } from './models';\nimport { environment } from '../../../../environments/environment';\n@Injectable({providedIn:'root'})\nexport class BankApi { private readonly http=inject(HttpClient); private readonly base=environment.apiBase; private request<T>(method:string,url:string,options:{body?:unknown;headers?:Record<string,string>;params?:Record<string,string>}={}){return this.http.request<T>(method,url,{...options,timeout:20000});} private household(id:string){return this.base+'/api/v1/households/'+encodeURIComponent(id);}
 \n${methods.join('\n')}\n}`,
 );
 mkdirSync('docs', { recursive: true });
@@ -88,6 +97,7 @@ mapping.push(
   '| Transferencias | transferAccounts, reallocateEnvelopes, transferEnvelopes |',
   '| Saldo inicial | registerOpeningBalance |',
   '| Historial, corrección y reversión | listMovements, getMovement, previewMovementCorrection, correctMovement, reverseMovement |',
+  '| Notificaciones | getPushVapidPublicKey, registerPushSubscription, sendTestPushNotification |',
   '| Reportes | Sin endpoint de reportes: estado de capacidad no disponible |',
   '',
   'getBudgetPeriod comprueba el estado vigente antes de guardar un plan y permite revisar un conflicto. getMovement consulta el detalle vigente antes de editar y evita corregir una fila obsoleta; getHousehold sigue generado para consultas específicas.',

@@ -1,0 +1,90 @@
+<section class="panel" aria-labelledby="notifications-title">
+  <h2 id="notifications-title">Notificaciones</h2>
+  <p>Recibe los avisos de BANK en este navegador.</p>
+  @if (!push.activeSession()) {
+    <p>Inicia sesión y selecciona un hogar.</p>
+  } @else {
+    @if (!push.supported) {
+      <p>
+        No compatible: Push requiere HTTPS o localhost, un navegador compatible y el service worker
+        de BANK activo.
+      </p>
+    } @else if (push.permission() === 'denied') {
+      <p>
+        Permiso bloqueado. Habilita las notificaciones de BANK en los ajustes de tu navegador y
+        vuelve a esta pantalla.
+      </p>
+    } @else {
+      @if (push.busy()) {
+        <p role="status">Activando notificaciones…</p>
+      } @else if (push.registered()) {
+        <p role="status">Registrado en BANK (esta sesión): {{ push.deviceName() }}.</p>
+      } @else if (!push.subscriptionReady()) {
+        <p role="status">Consultando la suscripción del navegador…</p>
+      } @else if (push.subscription()) {
+        <p>Suscripción local detectada / registro remoto no verificado.</p>
+      } @else {
+        <p>Desactivado: sin suscripción local.</p>
+      }
+      <label
+        >Nombre del dispositivo
+        <input
+          maxlength="100"
+          [value]="push.deviceName()"
+          [disabled]="push.busy()"
+          (input)="push.deviceName.set($any($event.target).value)"
+        />
+      </label>
+      <button
+        type="button"
+        class="primary"
+        [disabled]="!push.canActivate()"
+        (click)="push.activate()"
+      >
+        <app-icon name="mail" size="sm" />
+        {{
+          push.busy()
+            ? 'Activando…'
+            : push.subscription()
+              ? 'Sincronizar notificaciones'
+              : 'Activar notificaciones'
+        }}
+      </button>
+    }
+    @if (push.loading()) {
+      <p role="status">Consultando configuración de notificaciones…</p>
+    }
+    @if (push.notice()) {
+      <p role="status">{{ push.notice() }}</p>
+    }
+    @if (push.error()) {
+      <p class="error" role="alert">{{ push.error() }}</p>
+      <button type="button" [disabled]="push.busy() || push.testing()" (click)="push.retry()">
+        Volver a consultar
+      </button>
+    }
+    @if (push.owner()) {
+      <div class="test">
+        <button
+          type="button"
+          [disabled]="push.testing() || push.busy() || push.loading()"
+          (click)="push.sendTest()"
+        >
+          {{ push.testing() ? 'Solicitando…' : 'Enviar notificación de prueba' }}
+        </button>
+        <p class="muted">Se solicita para todos los dispositivos activos del hogar.</p>
+      </div>
+    }
+    @if (push.testNotice()) {
+      <p role="status">{{ push.testNotice() }}</p>
+    }
+  }
+  <p class="muted">
+    En iPhone/iPad normalmente necesitas iOS/iPadOS 16.4 o posterior y abrir BANK desde su icono en
+    la pantalla de inicio. La compatibilidad depende del navegador y del sistema.
+  </p>
+  <p class="muted">
+    Cerrar sesión conserva la suscripción del navegador. No hay una opción de baja remota disponible
+    todavía; no compartas este perfil del navegador si puede recibir avisos de tu hogar.
+  </p>
+</section>

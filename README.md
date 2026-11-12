@@ -212,3 +212,7 @@ Crear sobre incluye Planeado habitual por quincena desde el inicio y lo guarda e
 ## Docker
 
 Dockerfile y compose.yaml incluidos. Consulta [el despliegue de la PWA](docs/DEPLOYMENT.md) para configurar BANK_API_URL y adaptar el Compose que vive fuera del repositorio.
+
+## Notificaciones Web Push
+
+Configuración incluye registro de este navegador y prueba solo para OWNER. Consulta [Web Push](docs/WEB_PUSH.md) para el contrato verificado, las pruebas y la incompatibilidad actual del payload de Raven con el worker Angular.

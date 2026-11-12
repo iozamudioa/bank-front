@@ -16,6 +16,12 @@
       "basicAuth": []
     }
   ],
+  "tags": [
+    {
+      "description": "Administración de notificaciones Web Push de BANK",
+      "name": "Push Subscriptions"
+    }
+  ],
   "paths": {
     "/api/v1/households": {
       "get": {
@@ -5298,6 +5304,115 @@
         ]
       }
     },
+    "/api/v1/households/{householdId}/push-subscriptions": {
+      "post": {
+        "description": "Registra una suscripción en Raven\ny la vincula al integrante autenticado\ndentro de su hogar.\n",
+        "operationId": "registerPushSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "householdId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterPushSubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushSubscriptionResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Registrar dispositivo Web Push",
+        "tags": [
+          "Push Subscriptions"
+        ]
+      }
+    },
+    "/api/v1/households/{householdId}/push-subscriptions/test-notification": {
+      "post": {
+        "description": "Envía una notificación de prueba\na todos los dispositivos activos\nregistrados en el hogar.\n\nSolo el propietario del hogar\npuede ejecutar esta operación.\n",
+        "operationId": "sendTestPushNotification",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "householdId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendHouseholdNotificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "Enviar notificación Web Push de prueba",
+        "tags": [
+          "Push Subscriptions"
+        ]
+      }
+    },
+    "/api/v1/households/{householdId}/push-subscriptions/vapid-public-key": {
+      "get": {
+        "description": "Obtiene desde Raven la clave pública VAPID\nnecesaria para generar suscripciones\nWeb Push desde el navegador.\n",
+        "operationId": "getPushVapidPublicKey",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "householdId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VapidPublicKeyResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Obtener clave pública VAPID",
+        "tags": [
+          "Push Subscriptions"
+        ]
+      }
+    },
     "/api/v1/me": {
       "get": {
         "description": "Devuelve el username de HTTP Basic. No existe login con token ni registro de usuarios.",
@@ -5729,7 +5844,8 @@
             "example": "account-cash"
           }
         },
-        "description": "BalanceEffectResponse: respuesta REST independiente de MongoDB; importes numéricos y campos auditados."
+        "description": "BalanceEffectResponse: respuesta REST independiente de MongoDB; importes numéricos y campos auditados.",
+        "readOnly": true
       },
       "BudgetLineRequest": {
         "required": [
@@ -7200,6 +7316,40 @@
           "description": "Saldo inicial real"
         }
       },
+      "PushSubscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "householdId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "installationId": {
+            "type": "string"
+          },
+          "memberId": {
+            "type": "string"
+          },
+          "subscriberKey": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "ReallocationReplacementRequest": {
         "type": "object",
         "description": "Reemplazo REALLOCATE; campos completos del nuevo movimiento.",
@@ -7292,6 +7442,40 @@
           "toEnvelopeId": "envelope-central",
           "amount": 70,
           "description": "Apoyo de presupuesto"
+        }
+      },
+      "RegisterPushSubscriptionRequest": {
+        "required": [
+          "auth",
+          "deviceName",
+          "endpoint",
+          "installationId",
+          "p256dh"
+        ],
+        "type": "object",
+        "properties": {
+          "auth": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "deviceName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "endpoint": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "installationId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "p256dh": {
+            "minLength": 1,
+            "type": "string"
+          }
         }
       },
       "ReleaseReplacementRequest": {
@@ -7393,6 +7577,31 @@
               "amount": 1000
             }
           ]
+        }
+      },
+      "SendHouseholdNotificationRequest": {
+        "required": [
+          "message",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "title": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          }
         }
       },
       "TransferReplacementRequest": {
@@ -7543,6 +7752,14 @@
           }
         },
         "description": "UserResponse: respuesta REST independiente de MongoDB; importes numéricos y campos auditados."
+      },
+      "VapidPublicKeyResponse": {
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": "string"
+          }
+        }
       }
     },
     "securitySchemes": {
