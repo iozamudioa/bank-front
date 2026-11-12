@@ -409,4 +409,41 @@ describe('Web Push del mismo origen', () => {
     expect(push.subscriptionReady()).toBe(true);
     expect(push.subscriptionError()).toBe('');
   });
+  for (const failed of ['members', 'user'])
+    it('activa aunque falle ' + failed, async () => {
+      setup();
+      http
+        .expectOne('/api/v1/households/h/push-subscriptions/vapid-public-key')
+        .flush({ publicKey });
+      if (failed === 'user') {
+        http.expectOne('/api/v1/households/h/members').flush([]);
+        http.expectOne('/api/v1/me').flush({}, { status: 503, statusText: 'Unavailable' });
+      } else {
+        http.expectOne('/api/v1/me').flush({ username: 'olda' });
+        http
+          .expectOne('/api/v1/households/h/members')
+          .flush({}, { status: 503, statusText: 'Unavailable' });
+      }
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(push.canActivate()).toBe(true);
+      expect(push.owner()).toBe(false);
+      expect(push.error()).toBe('');
+    });
+  it('un error VAPID bloquea solo hasta reintentar su carga', async () => {
+    setup();
+    http.expectOne('/api/v1/me').flush({ username: 'olda' });
+    http.expectOne('/api/v1/households/h/members').flush([]);
+    http
+      .expectOne('/api/v1/households/h/push-subscriptions/vapid-public-key')
+      .flush({}, { status: 503, statusText: 'Unavailable' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(push.canActivate()).toBe(false);
+    expect(push.error()).toContain('VAPID');
+    push.retry();
+    fixture.detectChanges();
+    await ready();
+    expect(push.canActivate()).toBe(true);
+  });
 });

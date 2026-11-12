@@ -63,10 +63,9 @@ export class PushNotifications {
   readonly testing = signal(false);
   readonly loading = signal(false);
   private readonly ownerConfirmed = signal(false);
+  private readonly ownerContext = signal('');
   private readonly configurationContext = signal('');
-  readonly owner = computed(
-    () => this.ownerConfirmed() && this.configurationContext() === this.context(),
-  );
+  readonly owner = computed(() => this.ownerConfirmed() && this.ownerContext() === this.context());
   readonly registered = signal(false);
   readonly error = signal('');
   readonly notice = signal('');
@@ -106,17 +105,25 @@ export class PushNotifications {
       if (!context) return;
       this.loading.set(true);
       const household = this.store.householdId();
-      const request = forkJoin({
-        key: this.store.api.getPushVapidPublicKey(household),
+      const permissions = forkJoin({
         user: this.store.api.getCurrentUser(),
         members: this.store.api.listHouseholdMembers(household),
       }).subscribe({
-        next: ({ key, user, members }) => {
+        next: ({ user, members }) => {
           if (context !== this.context()) return;
-          this.configurationContext.set(context);
+          this.ownerContext.set(context);
           this.ownerConfirmed.set(
             members.some((m) => m.active && m.username === user.username && m.role === 'OWNER'),
           );
+        },
+        error: () => {
+          if (context === this.context()) this.ownerConfirmed.set(false);
+        },
+      });
+      const request = this.store.api.getPushVapidPublicKey(household).subscribe({
+        next: (key) => {
+          if (context !== this.context()) return;
+          this.configurationContext.set(context);
           try {
             vapidBytes(key.publicKey ?? '');
             this.publicKey.set(key.publicKey!);
@@ -126,7 +133,7 @@ export class PushNotifications {
         },
         error: (e) => {
           if (context === this.context()) {
-            this.error.set(pushError(e));
+            this.error.set('No se pudo obtener la clave VAPID. ' + pushError(e));
             this.loading.set(false);
           }
         },
@@ -134,7 +141,10 @@ export class PushNotifications {
           if (context === this.context()) this.loading.set(false);
         },
       });
-      onCleanup(() => request.unsubscribe());
+      onCleanup(() => {
+        request.unsubscribe();
+        permissions.unsubscribe();
+      });
     });
     if (!this.supported || !this.sw) return;
     this.sw.subscription.pipe(takeUntilDestroyed()).subscribe({
