@@ -54,6 +54,11 @@ export class PushNotifications {
   readonly permission = signal<NotificationPermission>(this.browser.permission());
   readonly subscription = signal<PushSubscription | null>(null);
   readonly subscriptionReady = signal(!this.supported);
+  readonly subscriptionLoading = signal(this.supported);
+  readonly subscriptionError = signal('');
+  private fallbackManager: PushManager | null = null;
+  private fallbackTimer?: ReturnType<typeof setTimeout>;
+  private cancelProbe?: () => void;
   readonly busy = signal(false);
   readonly testing = signal(false);
   readonly loading = signal(false);
@@ -132,13 +137,24 @@ export class PushNotifications {
       onCleanup(() => request.unsubscribe());
     });
     if (!this.supported || !this.sw) return;
-    this.sw.subscription.pipe(takeUntilDestroyed()).subscribe((sub) => {
-      if (sub?.endpoint !== this.subscription()?.endpoint) this.registered.set(false);
-      this.subscription.set(sub);
-      this.subscriptionReady.set(true);
+    this.sw.subscription.pipe(takeUntilDestroyed()).subscribe({
+      next: (sub) => this.acceptSubscription(sub),
+      error: () => {
+        if (!this.subscriptionReady()) this.recoverSubscription();
+      },
+      complete: () => {
+        if (!this.subscriptionReady()) this.recoverSubscription();
+      },
+    });
+    if (!this.subscriptionReady() && !this.cancelProbe) {
+      this.fallbackTimer = setTimeout(() => this.recoverSubscription(), 1500);
+    }
+    this.destroyRef.onDestroy(() => {
+      clearTimeout(this.fallbackTimer);
+      this.cancelProbe?.();
     });
     this.sw.pushSubscriptionChanges.pipe(takeUntilDestroyed()).subscribe(({ newSubscription }) => {
-      this.subscription.set(newSubscription);
+      this.acceptSubscription(newSubscription);
       this.registered.set(false);
       if (this.activeSession())
         this.notice.set(
@@ -155,12 +171,62 @@ export class PushNotifications {
       this.destroyRef.onDestroy(() => window.removeEventListener('focus', focus));
     }
   }
+  private acceptSubscription(sub: PushSubscription | null) {
+    this.cancelProbe?.();
+    clearTimeout(this.fallbackTimer);
+    if (sub?.endpoint !== this.subscription()?.endpoint) this.registered.set(false);
+    this.subscription.set(sub);
+    this.subscriptionReady.set(true);
+    this.subscriptionLoading.set(false);
+    this.subscriptionError.set('');
+  }
+  private recoverSubscription() {
+    if (!this.supported || this.destroyRef.destroyed) return;
+    clearTimeout(this.fallbackTimer);
+    this.cancelProbe?.();
+    this.subscriptionReady.set(false);
+    this.subscriptionLoading.set(true);
+    this.subscriptionError.set('');
+    let cancelled = false;
+    const fail = () => {
+      if (cancelled) return;
+      this.cancelProbe?.();
+      this.subscriptionLoading.set(false);
+      this.subscriptionError.set(
+        'No se pudo consultar el servicio de notificaciones del navegador. Actualiza BANK o vuelve a intentarlo.',
+      );
+    };
+    const deadline = setTimeout(fail, 10000);
+    this.cancelProbe = () => {
+      cancelled = true;
+      clearTimeout(deadline);
+    };
+    void (async () => {
+      const registration = await this.browser.registration();
+      if (cancelled) return;
+      if (
+        !registration?.active ||
+        registration.active.state !== 'activated' ||
+        !registration.pushManager
+      )
+        throw new Error('Worker no disponible');
+      const manager = registration.pushManager;
+      const sub = await manager.getSubscription();
+      if (cancelled) return;
+      this.fallbackManager = manager;
+      this.acceptSubscription(sub);
+    })().catch(fail);
+  }
+
   reopen() {
     this.registered.set(false);
     this.testNotice.set('');
   }
   retry() {
-    if (!this.busy() && !this.testing()) this.reload.update((v) => v + 1);
+    if (!this.busy() && !this.testing() && !this.subscriptionLoading()) {
+      this.reload.update((v) => v + 1);
+      if (this.supported && !this.subscriptionReady()) this.recoverSubscription();
+    }
   }
   private installationId(): string {
     let storage: Storage;
@@ -196,11 +262,22 @@ export class PushNotifications {
         (oldKey.byteLength !== bytes.byteLength ||
           new Uint8Array(oldKey).some((b, i) => b !== bytes[i]))
       ) {
-        await this.sw!.unsubscribe();
+        if (this.fallbackManager) {
+          if (!(await sub!.unsubscribe()))
+            throw new Error(
+              'No se pudo actualizar la suscripción del navegador. Vuelve a intentarlo.',
+            );
+        } else await this.sw!.unsubscribe();
         if (context !== this.context()) return;
         sub = null;
       }
-      if (!sub) sub = await this.sw!.requestSubscription({ serverPublicKey: key });
+      if (!sub)
+        sub = this.fallbackManager
+          ? await this.fallbackManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: new Uint8Array(bytes),
+            })
+          : await this.sw!.requestSubscription({ serverPublicKey: key });
       if (context !== this.context()) return;
       this.subscription.set(sub);
       this.permission.set(this.browser.permission());

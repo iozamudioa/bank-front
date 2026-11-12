@@ -5,6 +5,7 @@ export interface PushBrowser {
   permission(): NotificationPermission;
   storage(): Storage;
   deviceName: string;
+  registration(): Promise<ServiceWorkerRegistration | undefined>;
 }
 export const PUSH_BROWSER = new InjectionToken<PushBrowser>('PUSH_BROWSER', {
   providedIn: 'root',
@@ -43,6 +44,17 @@ export const PUSH_BROWSER = new InjectionToken<PushBrowser>('PUSH_BROWSER', {
         return localStorage;
       },
       deviceName: name + ' en ' + platform,
+      registration: async () => {
+        if (!browser || !('serviceWorker' in navigator)) return undefined;
+        const worker = new URL('ngsw-worker.js', document.baseURI);
+        const registration = await navigator.serviceWorker.getRegistration(worker.href);
+        const active = registration?.active;
+        if (!active || active.state !== 'activated') throw new Error('Worker no activo');
+        const script = new URL(active.scriptURL);
+        if (script.origin !== worker.origin || script.pathname !== worker.pathname)
+          throw new Error('Worker inesperado');
+        return registration;
+      },
     };
   },
 });

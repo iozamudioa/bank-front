@@ -31,7 +31,8 @@ describe('Web Push del mismo origen', () => {
   let http: HttpTestingController;
   let push: PushNotifications;
   let permission: NotificationPermission;
-  let current: BehaviorSubject<PushSubscription | null>;
+  let current: Subject<PushSubscription | null>;
+  let readRegistration: ReturnType<typeof vi.fn>;
   let changes: Subject<{
     oldSubscription: PushSubscription | null;
     newSubscription: PushSubscription | null;
@@ -49,10 +50,12 @@ describe('Web Push del mismo origen', () => {
     supported = true,
     existing: PushSubscription | null = null,
     initial: NotificationPermission = 'default',
+    silent = false,
   ) {
     localStorage.clear();
     permission = initial;
-    current = new BehaviorSubject(existing);
+    current = silent ? new Subject() : new BehaviorSubject(existing);
+    readRegistration = vi.fn(async () => undefined);
     changes = new Subject();
     clicks = new Subject();
     sw = {
@@ -80,6 +83,7 @@ describe('Web Push del mismo origen', () => {
             permission: () => permission,
             storage: () => localStorage,
             deviceName: 'Chrome en Android',
+            registration: readRegistration,
           },
         },
       ],
@@ -99,7 +103,8 @@ describe('Web Push del mismo origen', () => {
     http
       .expectOne('/api/v1/households/' + household + '/members')
       .flush([{ username: 'olda', active: true, role }]);
-    await fixture.whenStable();
+    if (vi.isFakeTimers()) await vi.advanceTimersByTimeAsync(0);
+    else await fixture.whenStable();
     fixture.detectChanges();
   }
   function registration(status = 201) {
@@ -122,6 +127,7 @@ describe('Web Push del mismo origen', () => {
     http?.verify();
     fixture?.destroy();
     TestBed.resetTestingModule();
+    vi.useRealTimers();
   });
   it('muestra no compatible sin solicitar permiso ni crear un registro', async () => {
     setup(false);
@@ -301,5 +307,106 @@ describe('Web Push del mismo origen', () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     clicks.next({ notification: { data: { url: 'https://malicious.example' } } });
     expect(navigate).toHaveBeenCalledWith('/dashboard');
+  });
+  function nativeRegistration(sub: PushSubscription | null = null) {
+    const manager = {
+      getSubscription: vi.fn(async () => sub),
+      subscribe: vi.fn(async () => subscription()),
+    };
+    readRegistration.mockResolvedValue({ active: { state: 'activated' }, pushManager: manager });
+    return manager;
+  }
+  it('recupera null desde PushManager sin emisión ni controlador y permite activar en el mismo registro', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+    setup(true, null, 'default', true);
+    const manager = nativeRegistration();
+    await ready();
+    expect(push.subscriptionReady()).toBe(false);
+    expect(push.canActivate()).toBe(false);
+    await vi.advanceTimersByTimeAsync(1500);
+    fixture.detectChanges();
+    expect(manager.getSubscription).toHaveBeenCalledTimes(1);
+    expect(push.subscriptionReady()).toBe(true);
+    expect(push.subscription()).toBeNull();
+    expect(push.canActivate()).toBe(true);
+    const activation = push.activate();
+    await Promise.resolve();
+    registration();
+    await activation;
+    expect(manager.subscribe).toHaveBeenCalledWith({
+      userVisibleOnly: true,
+      applicationServerKey: expect.any(Uint8Array),
+    });
+    expect(sw.requestSubscription).not.toHaveBeenCalled();
+  });
+  it('recupera y reutiliza una suscripción nativa preexistente sin crear otra', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+    setup(true, null, 'granted', true);
+    const existing = subscription(),
+      manager = nativeRegistration(existing);
+    await ready();
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(push.subscription()).toBe(existing);
+    const activation = push.activate();
+    registration();
+    await activation;
+    expect(manager.subscribe).not.toHaveBeenCalled();
+  });
+  it('muestra error si getSubscription falla y permite recuperar con reintento real', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+    setup(true, null, 'default', true);
+    const manager = nativeRegistration();
+    manager.getSubscription.mockRejectedValueOnce(new Error('Browser failed'));
+    await ready();
+    await vi.advanceTimersByTimeAsync(1500);
+    fixture.detectChanges();
+    expect(push.subscriptionReady()).toBe(false);
+    expect(push.subscriptionLoading()).toBe(false);
+    expect(push.canActivate()).toBe(false);
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain(
+      'No se pudo consultar',
+    );
+    expect(fixture.nativeElement.textContent).not.toContain('Consultando la suscripción');
+    push.retry();
+    fixture.detectChanges();
+    await ready();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(manager.getSubscription).toHaveBeenCalledTimes(2);
+    expect(push.subscriptionReady()).toBe(true);
+    expect(push.subscriptionError()).toBe('');
+  });
+  for (const kind of ['missing', 'inactive', 'timeout', 'subscription-timeout'])
+    it('no inventa disponibilidad del worker: ' + kind, async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+      setup(true, null, 'default', true);
+      if (kind === 'inactive')
+        readRegistration.mockResolvedValue({ active: { state: 'activating' }, pushManager: {} });
+      if (kind === 'timeout') readRegistration.mockReturnValue(new Promise(() => {}));
+      if (kind === 'subscription-timeout')
+        nativeRegistration().getSubscription.mockReturnValue(new Promise(() => {}));
+      await ready();
+      await vi.advanceTimersByTimeAsync(11500);
+      fixture.detectChanges();
+      expect(push.subscriptionReady()).toBe(false);
+      expect(push.subscriptionLoading()).toBe(false);
+      expect(push.subscriptionError()).not.toBe('');
+      expect(push.canActivate()).toBe(false);
+    });
+  it('una emisión tardía de SwPush prevalece sobre una consulta nativa obsoleta', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+    setup(true, null, 'default', true);
+    let resolve!: (sub: PushSubscription | null) => void;
+    nativeRegistration().getSubscription.mockImplementation(
+      () => new Promise((r) => (resolve = r)),
+    );
+    await ready();
+    await vi.advanceTimersByTimeAsync(1500);
+    const latest = subscription();
+    current.next(latest);
+    resolve(null);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(push.subscription()).toBe(latest);
+    expect(push.subscriptionReady()).toBe(true);
+    expect(push.subscriptionError()).toBe('');
   });
 });

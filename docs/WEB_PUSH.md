@@ -109,3 +109,13 @@ La comprobación pública por HTTPS devolvió 200 para /, /manifest.webmanifest,
 9. Denegar permisos y comprobar las instrucciones sin diálogos repetidos; restaurarlos en ajustes y volver a BANK.
 
 iOS/iPadOS normalmente necesita 16.4 o posterior y la app añadida a pantalla de inicio; no se promete soporte en cualquier pestaña Safari. Fuente: [WebKit, requisitos de Web Push](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/).
+
+## Recuperación cuando el worker está activo sin controlador
+
+Si SwPush.subscription no emite durante 1,5 segundos, BANK consulta el registro existente de ngsw-worker.js con navigator.serviceWorker.getRegistration(), sin esperar navigator.serviceWorker.controller ni navigator.serviceWorker.ready. Comprueba que el worker corresponde al script de Angular y está activated, y consulta su PushManager.getSubscription(). No crea ni reemplaza registros de service worker.
+
+subscriptionReady solo cambia a true tras una emisión comprobada de Angular o una consulta nativa resuelta, incluso si el resultado es null. La consulta de respaldo tiene un límite de 10 segundos; errores, registro ausente o worker no activo detienen el estado de carga y muestran un reintento. Una emisión posterior de Angular cancela la consulta pendiente para impedir que un resultado antiguo reemplace una suscripción más reciente.
+
+En esta recuperación, activar usa el PushManager del mismo registro validado mediante un gesto explícito. Así tampoco depende del canal de SwPush.requestSubscription, que en la versión instalada espera un controlador. La ruta normal de SwPush y sus eventos se conservan. El permiso, VAPID, las validaciones, el UUID y el POST autenticado relativo siguen iguales.
+
+Los tests cubren un stream silencioso con getSubscription devolviendo null o una suscripción, activación nativa, errores y reintento, falta de registro, estado no activado, esperas agotadas tanto del registro como de getSubscription, y resultados atrasados. La detección del navegador también se prueba con controller undefined y rechazo de otros scripts.

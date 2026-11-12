@@ -19,8 +19,10 @@
         <p role="status">Activando notificaciones…</p>
       } @else if (push.registered()) {
         <p role="status">Registrado en BANK (esta sesión): {{ push.deviceName() }}.</p>
-      } @else if (!push.subscriptionReady()) {
+      } @else if (push.subscriptionLoading()) {
         <p role="status">Consultando la suscripción del navegador…</p>
+      } @else if (push.subscriptionError()) {
+        <p>No se pudo comprobar la suscripción local.</p>
       } @else if (push.subscription()) {
         <p>Suscripción local detectada / registro remoto no verificado.</p>
       } @else {
@@ -57,9 +59,13 @@
     @if (push.notice()) {
       <p role="status">{{ push.notice() }}</p>
     }
-    @if (push.error()) {
-      <p class="error" role="alert">{{ push.error() }}</p>
-      <button type="button" [disabled]="push.busy() || push.testing()" (click)="push.retry()">
+    @if (push.error() || push.subscriptionError()) {
+      <p class="error" role="alert">{{ push.error() || push.subscriptionError() }}</p>
+      <button
+        type="button"
+        [disabled]="push.busy() || push.testing() || push.subscriptionLoading()"
+        (click)="push.retry()"
+      >
         Volver a consultar
       </button>
     }
