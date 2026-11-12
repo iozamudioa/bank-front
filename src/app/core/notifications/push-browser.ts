@@ -46,7 +46,7 @@ export const PUSH_BROWSER = new InjectionToken<PushBrowser>('PUSH_BROWSER', {
       deviceName: name + ' en ' + platform,
       registration: async () => {
         if (!browser || !('serviceWorker' in navigator)) return undefined;
-        const worker = new URL('ngsw-worker.js', document.baseURI);
+        const worker = new URL('bank-sw.js', document.baseURI);
         const registration = await navigator.serviceWorker.getRegistration(worker.href);
         const active = registration?.active;
         if (!active || active.state !== 'activated') throw new Error('Worker no activo');
