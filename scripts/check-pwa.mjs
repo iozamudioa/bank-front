@@ -8,6 +8,8 @@ assert.equal(manifest.display, 'standalone');
 assert.equal(sw.dataGroups.length, 0);
 for (const icon of manifest.icons) assert.ok(existsSync(root + icon.src));
 assert.ok(existsSync(root + 'ngsw-worker.js'));
+assert.ok(existsSync(root + 'bank-sw.js'));
+assert.match(readFileSync(root + 'bank-sw.js', 'utf8'), /importScripts\('\.\/ngsw-worker\.js'\)/);
 assert.ok(existsSync(root + 'theme-init.js'));
 assert.ok(sw.hashTable['/theme-init.js']);
 assert.ok(sw.hashTable['/fonts/material-symbols-rounded.woff2']);
