@@ -32,9 +32,9 @@ export class App implements OnInit {
   readonly username = signal('');
   readonly store = inject(HouseholdStore);
   readonly connection = inject(Connectivity);
-  ready = false;
-  busy = false;
-  error = '';
+  readonly ready = signal(false);
+  readonly busy = signal(false);
+  readonly error = signal('');
   readonly links = [
     ['/dashboard', 'dashboard', 'Resumen'],
     ['/accounts', 'account_balance_wallet', 'Cuentas'],
@@ -48,19 +48,19 @@ export class App implements OnInit {
     void this.initialize();
   }
   async initialize() {
-    if (this.busy) return;
-    this.busy = true;
-    this.error = '';
+    if (this.busy()) return;
+    this.busy.set(true);
+    this.error.set('');
     try {
       const user = await firstValueFrom(this.store.api.getCurrentUser());
       this.username.set(user.username);
       await this.store.loadHouseholds();
-      this.ready = true;
+      this.ready.set(true);
     } catch (e) {
-      this.ready = false;
-      this.error = errorMessage(e);
+      this.ready.set(false);
+      this.error.set(errorMessage(e));
     } finally {
-      this.busy = false;
+      this.busy.set(false);
     }
   }
 }
