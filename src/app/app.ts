@@ -11,6 +11,7 @@ import { HouseholdStore } from './core/config/household-store';
 import { Connectivity } from './core/config/connectivity';
 import { errorMessage } from './core/errors/message';
 import { firstValueFrom } from 'rxjs';
+import { destroyKingdomSession } from './core/api/auth.interceptor';
 @Component({
   selector: 'app-root',
   imports: [
@@ -32,6 +33,7 @@ export class App implements OnInit {
   readonly username = signal('');
   readonly store = inject(HouseholdStore);
   readonly connection = inject(Connectivity);
+  readonly logout = destroyKingdomSession;
   readonly ready = signal(false);
   readonly busy = signal(false);
   readonly error = signal('');
