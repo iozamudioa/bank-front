@@ -1,12 +1,10 @@
 import { environment } from '../../../environments/environment';
-import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
-import { Session } from '../auth/session';
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(Session).authorization();
-  return next(
-    auth && req.url.startsWith(environment.apiBase + '/api/')
-      ? req.clone({ setHeaders: { Authorization: auth, 'Cache-Control': 'no-store' } })
+
+// Kingdom Passport is an HttpOnly cookie managed by Bastion, not by Angular.
+export const authInterceptor: HttpInterceptorFn = (req, next) =>
+  next(
+    req.url.startsWith(environment.apiBase + '/api/')
+      ? req.clone({ withCredentials: true })
       : req,
   );
-};
