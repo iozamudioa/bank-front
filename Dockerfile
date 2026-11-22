@@ -5,11 +5,6 @@ RUN npm ci
 COPY . .
 RUN npm run build && npm run pwa:check
 
-FROM nginx:stable-alpine
-RUN apk add --no-cache ca-certificates
-ENV BANK_API_URL=http://bank-api:8080
-ENV NGINX_ENVSUBST_FILTER=^BANK_API_URL$
-COPY --from=build /app/dist/bank/browser/ /usr/share/nginx/html/
-COPY deploy/default.conf.template /etc/nginx/templates/default.conf.template
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM registry.ioza.dev/kingdom/tavern-host:0.0.1-SNAPSHOT
+COPY --from=build --chown=kingdom:kingdom /app/dist/bank/browser/ /app/tavern/
+EXPOSE 8080
