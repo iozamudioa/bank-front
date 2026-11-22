@@ -25,8 +25,8 @@ services:
         condition: service_healthy
     environment:
       BASTION_URL: http://bastion:8080
-      BASTION_USERNAME: ${BASTION_TAVERN_USERNAME:-tavern}
-      BASTION_PASSWORD: ${BASTION_TAVERN_PASSWORD:?Set BASTION_TAVERN_PASSWORD in the deployment .env}
+      BASTION_USERNAME: tavern
+      BASTION_PASSWORD: kingdom
     entrypoint: ["/bin/sh", "-ec"]
     command:
       - |
