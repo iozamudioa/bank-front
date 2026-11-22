@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Session } from '../auth/session';
 import { HouseholdStore } from '../config/household-store';
 import { createIdempotencyKey } from '../../shared/utils/idempotency-key';
 import { PUSH_BROWSER } from './push-browser';
@@ -46,7 +45,6 @@ export function pushError(error: unknown): string {
 export class PushNotifications {
   private readonly sw = inject(SwPush, { optional: true });
   readonly browser = inject(PUSH_BROWSER);
-  private readonly session = inject(Session);
   private readonly store = inject(HouseholdStore);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -73,11 +71,7 @@ export class PushNotifications {
   readonly deviceName = signal(this.browser.deviceName);
   private readonly publicKey = signal('');
   private readonly reload = signal(0);
-  private readonly context = computed(() =>
-    this.session.authorization() && this.store.householdId()
-      ? this.session.authorization() + '|' + this.store.householdId()
-      : '',
-  );
+  private readonly context = computed(() => this.store.householdId());
   readonly activeSession = computed(() => !!this.context());
   readonly canActivate = computed(
     () =>
