@@ -9,7 +9,7 @@ export function destroyKingdomSession(): void {
   logoutStarted = true;
 
   // An explicit credentialed fetch sends BANK's origin rather than Origin: null.
-  // Bastion clears the HttpOnly cookie; then the browser displays confirmation.
+  // Bastion revokes its session; the browser starts a fresh Audience flow.
   void fetch('https://bastion.ioza.dev/audience/destroy', {
     method: 'POST',
     credentials: 'include',
@@ -17,7 +17,11 @@ export function destroyKingdomSession(): void {
   })
     .then((response) => {
       if (!response.ok) throw new Error('Kingdom logout failed');
-      window.location.replace('https://bastion.ioza.dev/audience/signed-out');
+      // Return to the exact Tavern page that initiated logout, not BANK hardcoded.
+      const returnTo = window.location.origin + window.location.pathname + window.location.search;
+      window.location.replace(
+        'https://bastion.ioza.dev/audience?returnTo=' + encodeURIComponent(returnTo),
+      );
     })
     .catch((error: unknown) => {
       logoutStarted = false;
