@@ -25,10 +25,12 @@ steps:
       - /home/iozamudioa/docker/bank-front:/home/iozamudioa/docker/bank-front
     commands:
       - echo "$NEXUS_PASSWORD" | docker login registry.ioza.dev -u "$NEXUS_USERNAME" --password-stdin
+      - cp compose.yaml /home/iozamudioa/docker/bank-front/compose.yml
       - cd /home/iozamudioa/docker/bank-front
-      - docker compose -p bank-front pull bank-front
-      - docker compose -p bank-front up -d --force-recreate bank-front bank-front-emissary
-      - docker compose -p bank-front logs --tail=30 bank-front bank-front-emissary
+      - docker compose -f compose.yml -p bank-front config --quiet
+      - docker compose -f compose.yml -p bank-front pull bank-front bank-front-emissary
+      - docker compose -f compose.yml -p bank-front up -d --force-recreate bank-front bank-front-emissary
+      - docker compose -f compose.yml -p bank-front logs --tail=30 bank-front bank-front-emissary
 
 when:
   - event: [push, manual]
