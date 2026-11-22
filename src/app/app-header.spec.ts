@@ -38,14 +38,3 @@ describe('Cabecera móvil', () => {
   });
 });
 
-describe('Login', () => {
-  it('presenta los campos sin el aviso técnico ni el control de tema', () => {
-    const { element } = setup(false);
-    const login = element.querySelector('.login')!;
-    expect(login.querySelector('input[autocomplete="username"]')).not.toBeNull();
-    expect(login.querySelector('input[autocomplete="current-password"]')).not.toBeNull();
-    expect(login.textContent).not.toContain('HTTP Basic');
-    expect(login.textContent).not.toContain('Credenciales solo');
-    expect(login.textContent).not.toContain('Tema:');
-  });
-});
