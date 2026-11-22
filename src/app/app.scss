@@ -78,8 +78,41 @@
   border-radius: 50%;
   padding: 12px;
 }
-.sidebar-bottom button {
+.sidebar-bottom .user-details {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-bottom .logout-button {
   margin-left: auto;
+  flex: 0 0 auto;
+}
+.logout-button,
+.mobile-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  color: var(--bank-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+.logout-button:hover,
+.mobile-logout:hover {
+  color: var(--bank-primary);
+  background: var(--bank-primary-container);
+}
+.logout-button:focus-visible,
+.mobile-logout:focus-visible {
+  outline: 2px solid var(--bank-primary);
+  outline-offset: 2px;
+}
+.mobile-logout {
+  display: none;
 }
 .workspace {
   margin-left: 244px;
@@ -225,5 +258,13 @@
   .mobile-settings[aria-disabled='true'] {
     opacity: 0.5;
     pointer-events: none;
+  }
+}
+
+@media (max-width: 650px) {
+  .mobile-logout {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
   }
 }
