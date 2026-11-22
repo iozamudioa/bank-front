@@ -1,11 +1,18 @@
 services:
   bank-front:
-    build:
-      context: .
+    image: registry.ioza.dev/bank/bank-front:0.1.0-SNAPSHOT
     container_name: bank-front
     environment:
       TZ: America/Mexico_City
-      BANK_API_URL: ${BANK_API_URL:-http://bank-api:8080}
+      KINGDOM_TAVERN_HOST_MODE: STATIC
+      KINGDOM_TAVERN_API_PROXY_URL: http://bastion:8080
+      KINGDOM_TAVERN_NAME: bank-front
+      KINGDOM_TAVERN_DOMAIN: bank.ioza.dev
+      KINGDOM_TAVERN_PATH: /**
+      KINGDOM_BASTION_URL: http://bastion:8080
+      KINGDOM_BASTION_USERNAME: ${KINGDOM_BASTION_USERNAME}
+      KINGDOM_BASTION_PASSWORD: ${KINGDOM_BASTION_PASSWORD}
+      KINGDOM_TAVERN_LOCK_ENABLED: "false"
     restart: unless-stopped
     networks:
       - infra-net
