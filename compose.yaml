@@ -31,7 +31,7 @@ services:
     command:
       - |
         while true; do
-          manifest='{"tavernName":"bank-front","instanceId":"bank-front-nginx","target":"http://bank-front:80","healthPath":"/health","version":"0.1.0-SNAPSHOT","startedAt":"2026-01-01T00:00:00Z","capabilities":["ui"],"routePredicates":[{"name":"Host","value":"bank.ioza.dev"},{"name":"Path","value":"/**"}],"publicPaths":[]}'
+          manifest='{"tavernName":"bank-front","instanceId":"bank-front-nginx","target":"http://bank-front:80","healthPath":"/health","version":"0.1.0-SNAPSHOT","startedAt":"2026-01-01T00:00:00Z","capabilities":["ui"],"routePredicates":[{"name":"Host","value":"bank.ioza.dev"},{"name":"Path","value":"/**"}],"publicPaths":["/*.js","/*.css","/*.ico","/*.webmanifest","/fonts/**","/icons/**","/assets/**"]}'
           if curl --fail --silent --show-error --max-time 10 --retry 2 --retry-delay 2 --basic --user "$$BASTION_USERNAME:$$BASTION_PASSWORD" --header 'Content-Type: application/json' --data "$$manifest" "$$BASTION_URL/internal/kingdom/taverns"; then
             echo "BANK registered in Bastion"
           else
