@@ -1,4 +1,4 @@
-@if (!ready) {
+@if (!ready()) {
   <main class="login">
     <section class="login-story">
       <div class="brand">B<span>▲</span>NK</div>
@@ -8,12 +8,12 @@
     </section>
     <section class="login-form">
       <h2>Conectando con Kingdom…</h2>
-      @if (busy) {
+      @if (busy()) {
         <p>Verificando tu sesión de Bastion.</p>
       }
-      @if (error) {
-        <p role="alert" class="error">{{ error }}</p>
-        <button class="primary" [disabled]="busy" (click)="initialize()">Reintentar</button>
+      @if (error()) {
+        <p role="alert" class="error">{{ error() }}</p>
+        <button class="primary" [disabled]="busy()" (click)="initialize()">Reintentar</button>
       }
     </section>
   </main>
