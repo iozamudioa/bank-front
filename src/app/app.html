@@ -5,33 +5,16 @@
       <p class="eyebrow">FINANZAS EN FAMILIA</p>
       <h1>Cada peso tiene<br />su destino.</h1>
       <p>Tu dinero, tus planes y la tranquilidad de tener todo en un solo lugar.</p>
-      <div class="orbit">
-        <app-icon name="home" size="hero" /><span>Un hogar.<br />Un plan compartido.</span>
-      </div>
     </section>
     <section class="login-form">
-      <div class="badge">BIENVENIDO A CASA</div>
-      <h2>Vamos a poner todo en orden.</h2>
-      <p>Accede con tu usuario para continuar.</p>
-      <form [formGroup]="form" (ngSubmit)="login()">
-        <label>Usuario<input formControlName="username" autocomplete="username" required /></label
-        ><label
-          >Contraseña<input
-            type="password"
-            formControlName="password"
-            autocomplete="current-password"
-            required
-        /></label>
-        @if (error) {
-          <p role="alert" class="error">{{ error }}</p>
-        }
-        <button class="primary" [disabled]="form.invalid || busy || !connection.online()">
-          {{ busy ? 'Conectando…' : 'Entrar a mi hogar' }}
-          @if (!busy) {
-            <app-icon name="arrow_forward" size="sm" />
-          }
-        </button>
-      </form>
+      <h2>Conectando con Kingdom…</h2>
+      @if (busy) {
+        <p>Verificando tu sesión de Bastion.</p>
+      }
+      @if (error) {
+        <p role="alert" class="error">{{ error }}</p>
+        <button class="primary" [disabled]="busy" (click)="initialize()">Reintentar</button>
+      }
     </section>
   </main>
 } @else {
@@ -57,15 +40,9 @@
       }
     </nav>
     <div class="sidebar-bottom">
-      <div class="avatar">{{ session.username().slice(0, 1).toUpperCase() }}</div>
-      <span>{{ session.username() }}<small>Tu espacio familiar</small></span
-      ><button
-        aria-label="Cerrar sesión"
-        [disabled]="safety.locked() || safety.modalOpen()"
-        (click)="logout()"
+      <div class="avatar">{{ username().slice(0, 1).toUpperCase() }}</div>
+      <span>{{ username() }}<small>Tu espacio familiar</small></span
       >
-        <app-icon name="logout" />
-      </button>
     </div>
   </aside>
   <div class="workspace">
