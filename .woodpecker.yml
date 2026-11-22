@@ -27,8 +27,8 @@ steps:
       - echo "$NEXUS_PASSWORD" | docker login registry.ioza.dev -u "$NEXUS_USERNAME" --password-stdin
       - cd /home/iozamudioa/docker/bank-front
       - docker compose -p bank-front pull bank-front
-      - docker compose -p bank-front up -d --force-recreate --no-deps bank-front
-      - docker compose -p bank-front logs --tail=30 bank-front
+      - docker compose -p bank-front up -d --force-recreate bank-front bank-front-emissary
+      - docker compose -p bank-front logs --tail=30 bank-front bank-front-emissary
 
 when:
   - event: [push, manual]
