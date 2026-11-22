@@ -41,8 +41,17 @@
     </nav>
     <div class="sidebar-bottom">
       <div class="avatar">{{ username().slice(0, 1).toUpperCase() }}</div>
-      <span>{{ username() }}<small>Tu espacio familiar</small></span
+      <span class="user-details">{{ username() }}<small>Tu espacio familiar</small></span
       >
+      <button
+        type="button"
+        class="logout-button"
+        (click)="logout()"
+        aria-label="Cerrar sesión de Kingdom"
+        title="Cerrar sesión"
+      >
+        <app-icon name="logout" />
+      </button>
     </div>
   </aside>
   <div class="workspace">
@@ -67,8 +76,16 @@
       >
         <app-icon name="settings" />
       </a>
+      <button
+        type="button"
+        class="mobile-logout"
+        (click)="logout()"
+        aria-label="Cerrar sesión de Kingdom"
+        title="Cerrar sesión"
+      >
+        <app-icon name="logout" />
+      </button>
       <div class="header-actions">
-        <button type="button" class="secondary" (click)="logout()" aria-label="Cerrar sesión de Kingdom">Salir</button>
         <button
           class="secondary"
           [disabled]="safety.locked() || safety.modalOpen() || !store.householdId()"
