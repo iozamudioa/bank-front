@@ -8,13 +8,22 @@ export function destroyKingdomSession(): void {
   if (logoutStarted) return;
   logoutStarted = true;
 
-  // A native navigation POST works without CORS and retains the shared cookie.
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = 'https://bastion.ioza.dev/audience/destroy';
-  form.style.display = 'none';
-  document.body.appendChild(form);
-  form.submit();
+  // An explicit credentialed fetch sends BANK's origin rather than Origin: null.
+  // Bastion clears the HttpOnly cookie; then the browser displays confirmation.
+  void fetch('https://bastion.ioza.dev/audience/destroy', {
+    method: 'POST',
+    credentials: 'include',
+    cache: 'no-store',
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error('Kingdom logout failed');
+      window.location.replace('https://bastion.ioza.dev/audience/signed-out');
+    })
+    .catch((error: unknown) => {
+      logoutStarted = false;
+      console.error('No se pudo cerrar la sesión de Kingdom', error);
+      window.alert('No se pudo cerrar la sesión de Kingdom. Inténtalo de nuevo.');
+    });
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
