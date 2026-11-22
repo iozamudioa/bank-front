@@ -68,6 +68,7 @@
         <app-icon name="settings" />
       </a>
       <div class="header-actions">
+        <button type="button" class="secondary" (click)="logout()" aria-label="Cerrar sesión de Kingdom">Salir</button>
         <button
           class="secondary"
           [disabled]="safety.locked() || safety.modalOpen() || !store.householdId()"
