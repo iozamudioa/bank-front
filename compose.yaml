@@ -16,6 +16,32 @@ services:
       retries: 3
       start_period: 10s
 
+  bank-front-emissary:
+    image: curlimages/curl:8.16.0
+    container_name: bank-front-emissary
+    restart: unless-stopped
+    depends_on:
+      bank-front:
+        condition: service_healthy
+    environment:
+      BASTION_URL: http://bastion:8080
+      BASTION_USERNAME: ${BASTION_TAVERN_USERNAME:-tavern}
+      BASTION_PASSWORD: ${BASTION_TAVERN_PASSWORD:?Set BASTION_TAVERN_PASSWORD in the deployment .env}
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        while true; do
+          manifest='{"tavernName":"bank-front","instanceId":"bank-front-nginx","target":"http://bank-front:80","healthPath":"/health","version":"0.1.0-SNAPSHOT","startedAt":"2026-01-01T00:00:00Z","capabilities":["ui"],"routePredicates":[{"name":"Host","value":"bank.ioza.dev"},{"name":"Path","value":"/**"}],"publicPaths":[]}'
+          if curl --fail --silent --show-error --max-time 10 --retry 2 --retry-delay 2 --basic --user "$$BASTION_USERNAME:$$BASTION_PASSWORD" --header 'Content-Type: application/json' --data "$$manifest" "$$BASTION_URL/internal/kingdom/taverns"; then
+            echo "BANK registered in Bastion"
+          else
+            echo "BANK registration failed; retrying in 30s" >&2
+          fi
+          sleep 30
+        done
+    networks:
+      - infra-net
+
 networks:
   infra-net:
     external: true
