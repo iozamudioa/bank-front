@@ -8,8 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PushNotifications } from './push-notifications';
 import { PUSH_BROWSER } from './push-browser';
 import { HouseholdStore } from '../config/household-store';
-import { Session } from '../auth/session';
 import { authInterceptor } from '../api/auth.interceptor';
+import { environment } from '../../../environments/environment';
 import { Notifications } from '../../features/settings/notifications/notifications';
 
 const publicKey = btoa(String.fromCharCode(4, ...new Array(64).fill(1)))
@@ -88,7 +88,6 @@ describe('Web Push del mismo origen', () => {
         },
       ],
     });
-    TestBed.inject(Session).set('olda', 'test-password');
     TestBed.inject(HouseholdStore).householdId.set('h');
     fixture = TestBed.createComponent(Notifications);
     push = TestBed.inject(PushNotifications);
@@ -97,20 +96,21 @@ describe('Web Push del mismo origen', () => {
   }
   async function ready(key = publicKey, role = 'OWNER', household = 'h') {
     http
-      .expectOne('/api/v1/households/' + household + '/push-subscriptions/vapid-public-key')
+      .expectOne(environment.apiBase + '/api/v1/households/' + household + '/push-subscriptions/vapid-public-key')
       .flush({ publicKey: key });
-    http.expectOne('/api/v1/me').flush({ username: 'olda' });
+    http.expectOne(environment.apiBase + '/api/v1/me').flush({ username: 'olda' });
     http
-      .expectOne('/api/v1/households/' + household + '/members')
+      .expectOne(environment.apiBase + '/api/v1/households/' + household + '/members')
       .flush([{ username: 'olda', active: true, role }]);
     if (vi.isFakeTimers()) await vi.advanceTimersByTimeAsync(0);
     else await fixture.whenStable();
     fixture.detectChanges();
   }
   function registration(status = 201) {
-    const req = http.expectOne('/api/v1/households/h/push-subscriptions');
-    expect(req.request.headers.get('Authorization')).toBe(TestBed.inject(Session).authorization());
-    expect(req.request.url.startsWith('/api/v1/')).toBe(true);
+    const req = http.expectOne(environment.apiBase + '/api/v1/households/h/push-subscriptions');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(req.request.withCredentials).toBe(true);
+    expect(req.request.url.startsWith(environment.apiBase + '/api/v1/')).toBe(true);
     expect(req.request.body).toMatchObject({
       endpoint: 'https://push.example/device',
       p256dh: 'real-browser-key',
@@ -199,7 +199,7 @@ describe('Web Push del mismo origen', () => {
       await ready();
       const result = push.activate();
       http
-        .expectOne('/api/v1/households/h/push-subscriptions')
+        .expectOne(environment.apiBase + '/api/v1/households/h/push-subscriptions')
         .flush({}, { status, statusText: 'Failure' });
       await result;
       expect(push.error()).not.toBe('');
@@ -212,7 +212,7 @@ describe('Web Push del mismo origen', () => {
     expect(fixture.nativeElement.textContent).toContain('Enviar notificación de prueba');
     const pending = push.sendTest();
     await push.sendTest();
-    const req = http.expectOne('/api/v1/households/h/push-subscriptions/test-notification');
+    const req = http.expectOne(environment.apiBase + '/api/v1/households/h/push-subscriptions/test-notification');
     expect(req.request.body.metadata.eventType).toBe('bank.notification.test');
     req.flush(null, { status: 202, statusText: 'Accepted' });
     await pending;
@@ -229,11 +229,11 @@ describe('Web Push del mismo origen', () => {
     await ready(publicKey, 'VIEWER', 'other');
     expect(push.owner()).toBe(false);
     expect(push.registered()).toBe(false);
-    TestBed.inject(Session).clear();
+    TestBed.inject(HouseholdStore).householdId.set('');
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Inicia sesión');
+    expect(push.activeSession()).toBe(false);
     expect(sw.unsubscribe).not.toHaveBeenCalled();
   });
   it('no registra una suscripción pendiente en otro usuario u hogar', async () => {
@@ -413,15 +413,15 @@ describe('Web Push del mismo origen', () => {
     it('activa aunque falle ' + failed, async () => {
       setup();
       http
-        .expectOne('/api/v1/households/h/push-subscriptions/vapid-public-key')
+        .expectOne(environment.apiBase + '/api/v1/households/h/push-subscriptions/vapid-public-key')
         .flush({ publicKey });
       if (failed === 'user') {
-        http.expectOne('/api/v1/households/h/members').flush([]);
-        http.expectOne('/api/v1/me').flush({}, { status: 503, statusText: 'Unavailable' });
+        http.expectOne(environment.apiBase + '/api/v1/households/h/members').flush([]);
+        http.expectOne(environment.apiBase + '/api/v1/me').flush({}, { status: 503, statusText: 'Unavailable' });
       } else {
-        http.expectOne('/api/v1/me').flush({ username: 'olda' });
+        http.expectOne(environment.apiBase + '/api/v1/me').flush({ username: 'olda' });
         http
-          .expectOne('/api/v1/households/h/members')
+          .expectOne(environment.apiBase + '/api/v1/households/h/members')
           .flush({}, { status: 503, statusText: 'Unavailable' });
       }
       await fixture.whenStable();
@@ -432,10 +432,10 @@ describe('Web Push del mismo origen', () => {
     });
   it('un error VAPID bloquea solo hasta reintentar su carga', async () => {
     setup();
-    http.expectOne('/api/v1/me').flush({ username: 'olda' });
-    http.expectOne('/api/v1/households/h/members').flush([]);
+    http.expectOne(environment.apiBase + '/api/v1/me').flush({ username: 'olda' });
+    http.expectOne(environment.apiBase + '/api/v1/households/h/members').flush([]);
     http
-      .expectOne('/api/v1/households/h/push-subscriptions/vapid-public-key')
+      .expectOne(environment.apiBase + '/api/v1/households/h/push-subscriptions/vapid-public-key')
       .flush({}, { status: 503, statusText: 'Unavailable' });
     await fixture.whenStable();
     fixture.detectChanges();
