@@ -1,0 +1,35 @@
+steps:
+  - name: publish-bank-front
+    image: docker:cli
+    environment:
+      NEXUS_USERNAME:
+        from_secret: nexus_username
+      NEXUS_PASSWORD:
+        from_secret: nexus_password
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - echo "$NEXUS_PASSWORD" | docker login registry.ioza.dev -u "$NEXUS_USERNAME" --password-stdin
+      - docker build -t registry.ioza.dev/bank/bank-front:0.1.0-SNAPSHOT .
+      - docker push registry.ioza.dev/bank/bank-front:0.1.0-SNAPSHOT
+
+  - name: deploy-bank-front
+    image: docker:cli
+    environment:
+      NEXUS_USERNAME:
+        from_secret: nexus_username
+      NEXUS_PASSWORD:
+        from_secret: nexus_password
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/iozamudioa/docker/bank-front:/home/iozamudioa/docker/bank-front
+    commands:
+      - echo "$NEXUS_PASSWORD" | docker login registry.ioza.dev -u "$NEXUS_USERNAME" --password-stdin
+      - cd /home/iozamudioa/docker/bank-front
+      - docker compose -p bank-front pull bank-front
+      - docker compose -p bank-front up -d --force-recreate --no-deps bank-front
+      - docker compose -p bank-front logs --tail=30 bank-front
+
+when:
+  - event: push
+    branch: main
