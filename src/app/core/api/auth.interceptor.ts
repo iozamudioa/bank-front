@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { catchError, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -66,8 +66,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const isIdentityRequest = req.url === environment.apiBase + '/api/v1/me';
 
   return next(req.clone({ withCredentials: true })).pipe(
-    tap(() => {
-      if (isIdentityRequest) sessionStorage.removeItem(recoveryKey);
+    tap((event) => {
+      if (isIdentityRequest && event instanceof HttpResponse) {
+        sessionStorage.removeItem(recoveryKey);
+      }
     }),
     catchError((error: unknown) => {
       if (
