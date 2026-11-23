@@ -1,22 +1,10 @@
 @if (!ready()) {
-  <main class="login">
-    <section class="login-story">
-      <div class="brand">B<span>▲</span>NK</div>
-      <p class="eyebrow">FINANZAS EN FAMILIA</p>
-      <h1>Cada peso tiene<br />su destino.</h1>
-      <p>Tu dinero, tus planes y la tranquilidad de tener todo en un solo lugar.</p>
-    </section>
-    <section class="login-form">
-      <h2>Conectando con Kingdom…</h2>
-      @if (busy()) {
-        <p>Verificando tu sesión de Bastion.</p>
-      }
-      @if (error()) {
-        <p role="alert" class="error">{{ error() }}</p>
-        <button class="primary" [disabled]="busy()" (click)="initialize()">Reintentar</button>
-      }
-    </section>
-  </main>
+  @if (error() && !busy()) {
+    <main class="session-error" role="alert">
+      <p>{{ error() }}</p>
+      <button class="primary" (click)="initialize()">Reintentar</button>
+    </main>
+  }
 } @else {
   <aside class="sidebar">
     <a routerLink="/dashboard" class="brand">B<span>▲</span>NK</a>
