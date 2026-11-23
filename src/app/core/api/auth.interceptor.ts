@@ -66,11 +66,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req.clone({ withCredentials: true })).pipe(
     catchError((error: unknown) => {
-      if (
-        error instanceof HttpErrorResponse &&
-        (error.status === 401 || error.status === 403)
-      ) {
-        recoverKingdomSession();
+      if (error instanceof HttpErrorResponse) {
+        const identityRequest = req.url === environment.apiBase + '/api/v1/me';
+        const authenticationFailed = error.status === 401 || error.status === 403;
+        // A cross-origin login redirect can be hidden by CORS and surface as status 0.
+        // Only retry authentication for the identity check when the browser is online.
+        const hiddenLoginRedirect = identityRequest && error.status === 0 && navigator.onLine;
+        if (authenticationFailed || hiddenLoginRedirect) {
+          recoverKingdomSession();
+        }
       }
       return throwError(() => error);
     }),
