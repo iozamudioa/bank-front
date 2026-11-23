@@ -1,5 +1,5 @@
-import { HttpErrorResponse, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
-import { catchError, tap, throwError } from 'rxjs';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 // Only Bastion can revoke the session and clear its HttpOnly passport.
@@ -30,12 +30,13 @@ export function destroyKingdomSession(): void {
     });
 }
 
-// Retry authentication once per tab, rather than looping for a forbidden identity.
+// Throttle recovery to avoid a redirect loop for an identity without permissions.
 const recoveryKey = 'bank.kingdom.auth-recovery';
 
 function recoverKingdomSession(): void {
-  if (logoutStarted || sessionStorage.getItem(recoveryKey)) return;
-  sessionStorage.setItem(recoveryKey, '1');
+  const lastRecovery = Number(sessionStorage.getItem(recoveryKey) || '0');
+  if (logoutStarted || Date.now() - lastRecovery < 60_000) return;
+  sessionStorage.setItem(recoveryKey, String(Date.now()));
   logoutStarted = true;
 
   const returnTo = window.location.href;
@@ -63,14 +64,7 @@ function recoverKingdomSession(): void {
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(environment.apiBase + '/api/')) return next(req);
 
-  const isIdentityRequest = req.url === environment.apiBase + '/api/v1/me';
-
   return next(req.clone({ withCredentials: true })).pipe(
-    tap((event) => {
-      if (isIdentityRequest && event instanceof HttpResponse) {
-        sessionStorage.removeItem(recoveryKey);
-      }
-    }),
     catchError((error: unknown) => {
       if (
         error instanceof HttpErrorResponse &&
