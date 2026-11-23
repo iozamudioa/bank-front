@@ -55,8 +55,8 @@ function recoverKingdomSession(): void {
     })
     .catch((error: unknown) => {
       console.warn('Kingdom recovery: revocation unavailable; checking passport', error);
-      // If revocation fails, Royal Guard checks the cookie on a fresh navigation.
-      window.location.replace(returnTo);
+      // Bastion/Keycloak can perform interactive authentication even if revocation failed.
+      window.location.replace(audience);
     });
 }
 
@@ -74,7 +74,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: unknown) => {
       if (
         error instanceof HttpErrorResponse &&
-        (error.status === 401 || (isIdentityRequest && error.status === 403))
+        (error.status === 401 || error.status === 403)
       ) {
         recoverKingdomSession();
       }
