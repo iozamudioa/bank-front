@@ -30,35 +30,20 @@ export function destroyKingdomSession(): void {
     });
 }
 
-// Throttle recovery to avoid a redirect loop for an identity without permissions.
-const recoveryKey = 'bank.kingdom.auth-recovery';
+// An expired passport is already cleared by Bastion when it returns HTTP 401.
+// Navigate immediately: waiting for a secondary logout fetch can leave the SPA stalled.
+// This flag deduplicates concurrent 401 responses only until the browser navigates.
+let authenticationRedirectStarted = false;
 
 function recoverKingdomSession(): void {
-  const lastRecovery = Number(sessionStorage.getItem(recoveryKey) || '0');
-  if (logoutStarted || Date.now() - lastRecovery < 60_000) return;
-  sessionStorage.setItem(recoveryKey, String(Date.now()));
-  logoutStarted = true;
+  if (authenticationRedirectStarted || logoutStarted) return;
+  authenticationRedirectStarted = true;
 
-  const returnTo = window.location.href;
+  const returnTo = window.location.origin + window.location.pathname + window.location.search;
   const audience =
     'https://bastion.ioza.dev/audience?returnTo=' + encodeURIComponent(returnTo);
 
-  // Revoke the HttpOnly passport via Bastion; never wait indefinitely.
-  void fetch('https://bastion.ioza.dev/audience/destroy', {
-    method: 'POST',
-    credentials: 'include',
-    cache: 'no-store',
-    signal: AbortSignal.timeout(5000),
-  })
-    .then((response) => {
-      if (!response.ok) throw new Error('Kingdom session revocation failed');
-      window.location.replace(audience);
-    })
-    .catch((error: unknown) => {
-      console.warn('Kingdom recovery: revocation unavailable; checking passport', error);
-      // Bastion/Keycloak can perform interactive authentication even if revocation failed.
-      window.location.replace(audience);
-    });
+  window.location.replace(audience);
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -68,7 +53,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
         const identityRequest = req.url === environment.apiBase + '/api/v1/me';
-        const authenticationFailed = error.status === 401 || error.status === 403;
+        // A forbidden operation is not proof that the session expired.
+        const authenticationFailed =
+          error.status === 401 || (identityRequest && error.status === 403);
         // A cross-origin login redirect can be hidden by CORS and surface as status 0.
         // Only retry authentication for the identity check when the browser is online.
         const hiddenLoginRedirect = identityRequest && error.status === 0 && navigator.onLine;
